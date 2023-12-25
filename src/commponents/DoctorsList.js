@@ -25,7 +25,7 @@ export default function DoctorsList() {
           <tr>
             <th>First Name</th>
             <th>Last Name</th>
-            <th>Email</th>
+            <th>Emailllll</th>
           </tr>
         </thead>
         <tbody>
