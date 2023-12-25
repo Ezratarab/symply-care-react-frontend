@@ -1,0 +1,33 @@
+.Home {
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: -2;
+}
+
+.bubble {
+  position: fixed;
+  bottom: 1%;
+  right: 5%;
+}
+
+.headers{
+  color: whitesmoke;
+  z-index: -1;
+  padding: 40px;
+  width:auto;
+  position:absolute;
+  margin-top: 30px;
+  margin-left: 40px;
+  font-size: 2.4em;
+  font-style: italic;
+}
+.headers h1 {
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 100); /* Add a 3D-like text shadow */
+}
