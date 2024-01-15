@@ -1,0 +1,85 @@
+.about-section {
+    margin-top: -3.8rem;
+    padding: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    background: linear-gradient(to right, #D0D0D0, #FBFCFF);
+}
+/* Image */
+.about-image-content {
+    width: 50%;
+    max-width: 100%;
+    text-align: center;
+}
+.about-image1 {
+    width: 80%;
+    height: auto;
+}
+/* Text */
+.about-text-content {
+    width: 50%;
+}
+.about-title {
+    margin-top: 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 40px;
+    font-weight: bold;
+    color: #17254d;
+}
+
+.about-description {
+    margin: 32px 0;
+    color: #4d4b4b;
+    font-family: 'Rubik', sans-serif;
+    font-size: 18px;
+    letter-spacing: .7px;
+    line-height: 1.7rem;
+}
+.about-text-title {
+    margin: 0 0 24px 0;
+    color: #223673;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: .7px;
+}
+/* Steps */
+.about-text-step {
+    margin: 16px 0;
+}
+.about-text-sTitle {
+    font-family: 'Rubik', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: .7px;
+}
+.about-text-description {
+    margin: 8px 24px;
+    color: #4d4b4b;
+    font-family: 'Rubik', sans-serif;
+    letter-spacing: .7px;
+    line-height: 1.6rem;
+}
+.fa-icon {
+    color: #223673;
+}
+/* Responsive */
+@media screen and (max-width: 1000px) {
+    .about-section {
+        display: block;
+    }
+    .about-image-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 32px 0;
+    }
+    .about-image1 {
+        width: 100%;
+        height: 100%;
+    }
+    .about-text-content {
+        width: 100%;
+    }
+}

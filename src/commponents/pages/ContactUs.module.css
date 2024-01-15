@@ -1,0 +1,28 @@
+.login {
+    min-height: 100vh;
+    color: #223673;
+    margin-top: 20px;
+  }
+  
+  .bgImage  {
+    background-size: cover;
+    background-position:center;
+    height: 91vh; /* Set the height to 100% of the viewport height */
+  }
+  
+  .login-heading {
+    font-weight:bold;
+    margin-top: 20px;
+  }
+  
+  
+  .btn-login {
+    font-size: 0.9rem;
+    letter-spacing: 0.05rem;
+    padding: 0.75rem 1rem;
+    color:white;
+  }
+  .invalid
+  {
+    border-color: red!important;
+  }

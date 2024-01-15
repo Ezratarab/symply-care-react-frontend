@@ -3,16 +3,13 @@ import styles from "./LogIn.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { Link } from "react-router-dom";
-import backgroundImage from '../assets/op5.jpg';
+import backgroundImage from '../assets/contactus.jpg';
 
 const LogIn = () => {
   const defaultState = {
-    name: "",
-    email: "",
-    password: "",
+    text:"",
     id:"",
-    nameError: "",
-    passwordError: "",
+    textError: "",
     IdError: "",
   };
 
@@ -30,25 +27,16 @@ const LogIn = () => {
   };
 
   const validate = () => {
-    let nameError = "";
-    let passwordError = "";
+    let textError = "";
     let IdError = "";
-
-    if (!state.name) {
-      nameError = "Name field is required";
-    }
 
     const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     if (!state.id || reg.test(state.id) === false) {
       IdError = "ID Field is Invalid ";
     }
 
-    if (!state.password) {
-      passwordError = "Password field is required";
-    }
-
-    if (nameError || passwordError || IdError) {
-      setState({ ...state, nameError, passwordError, IdError });
+    if (textError || IdError) {
+      setState({ ...state, textError,IdError });
       return false;
     }
 
@@ -80,7 +68,7 @@ const LogIn = () => {
                     className={`col-md-9 col-lg-8 mx-auto ${styles.loginForm}`}
                   >
                     <h3 className={`login-heading mb-4 ${styles.loginHeading}`}>
-                      Welcome back!
+                      Let us know if you have any questions!
                     </h3>
 
                     <form>
@@ -103,39 +91,26 @@ const LogIn = () => {
                           {state.IdError}
                         </span>
                       </div>
+
+                      
                       <div
                         className={`form-floating mb-3 ${styles.formFloating}`}
                       >
                         <input
-                          type="password"
+                          type="text"
                           className={`form-control ${styles.input} ${
-                            state.passwordError ? styles.invalid : ""
+                            state.textError ? styles.invalid : ""
                           }`}
-                          id="floatingPassword"
-                          name="password"
-                          placeholder="Password"
-                          value={state.password}
+                          id="floatingText"
+                          name="text"
+                          placeholder="Your Message"
+                          value={state.text}
                           onChange={handleInputChange}
                         />
-                        <label htmlFor="floatingPassword">Password</label>
+                        <label htmlFor="floatingPassword">Your Message</label>
                         <span className={`text-danger ${styles.errorText}`}>
-                          {state.passwordError}
+                          {state.textError}
                         </span>
-                      </div>
-
-                      <div className={`form-check mb-3 ${styles.formCheck}`}>
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                          id="rememberPasswordCheck"
-                        />
-                        <label
-                          className={`form-check-label ${styles.checkboxLabel}`}
-                          htmlFor="rememberPasswordCheck"
-                        >
-                          Remember password
-                        </label>
                       </div>
 
                       <div className={`d-grid ${styles.grid}`}>
@@ -144,31 +119,8 @@ const LogIn = () => {
                           type="button"
                           onClick={submit}
                         >
-                          Sign in
+                          Send
                         </button>
-                        <div
-                          className={`d-flex justify-content-between mb-2 ${styles.forgotRegisterButtons}`}
-                        >
-                          <button
-                            className={`btn btn-lg btn-primary btn-login fw-bold ${styles.forgotPasswordButton}`}
-                            style={{ width: "48%", height: "45px" }}
-                            type="button"
-                            onClick={submit}
-                          >
-                            Forgot password?
-                          </button>
-                          <div style={{ width: "48%" }}>
-                            <Link to="/signup">
-                              <button
-                                className={`btn btn-lg btn-primary btn-login fw-bold w-100 ${styles.notRegisteredButton}`}
-                                style={{ height: "45px" }}
-                                type="button"
-                              >
-                                Not registered yet?
-                              </button>
-                            </Link>
-                          </div>
-                        </div>
                       </div>
                     </form>
                   </div>

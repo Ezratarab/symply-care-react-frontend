@@ -13,21 +13,32 @@
 
 .bubble {
   position: fixed;
-  bottom: 1%;
-  right: 5%;
+  bottom: 8%;
+  left: 4%;
 }
 
-.headers{
-  color: whitesmoke;
+.headers {
   z-index: -1;
   padding: 40px;
-  width:auto;
-  position:absolute;
+  width: 40%;
+  position: absolute;
   margin-top: 30px;
   margin-left: 40px;
-  font-size: 2.4em;
-  font-style: italic;
+  font-size: xx-small;
+  font-weight: bold;
+  letter-spacing: 0.7px;
+  font-family: "Poppins", sans-serif;
 }
 .headers h1 {
-  filter: drop-shadow(18px 16px 10px black);
+  color: #223673;
+  font-size: xxx-large;
+}
+
+.headers h3 {
+  color: #223673;
+  margin: 30px auto 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.8px;
+  line-height: 1.8rem;
 }
