@@ -22,6 +22,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ContactUs from "./commponents/pages/ContactUs";
 import Personal from "./commponents/pages/Personal";
 import { UserProvider } from "./commponents/Context";
+import ForgotPassword from "./commponents/pages/ForgotPassword";
 
 function App() {
 
@@ -43,7 +44,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/about" element={<About />} />
           <Route path="/contactus" element={<ContactUs/>} />
-          <Route path="/person" element={<Personal />} />
+          <Route path="/forgotPassword" element={<ForgotPassword/>} />
+          <Route path="/" element={<ForgotPassword/>} />
           <Route exact path="/" element={<Navigate to="/home" />} />
         </Routes>
         </UserProvider>

@@ -90,7 +90,7 @@ const LogIn = () => {
                         <input
                           type="id"
                           className={`form-control ${styles.input} ${
-                            state.emailError ? styles.invalid : ""
+                            state.IdError ? styles.invalid : ""
                           }`}
                           id="floatingInput"
                           name="id"
@@ -149,14 +149,15 @@ const LogIn = () => {
                         <div
                           className={`d-flex justify-content-between mb-2 ${styles.forgotRegisterButtons}`}
                         >
+                          <Link to="/forgotPassword">
                           <button
                             className={`btn btn-lg btn-primary btn-login fw-bold ${styles.forgotPasswordButton}`}
-                            style={{ width: "48%", height: "45px" }}
+                            style={{ width: "115%", height: "45px" }}
                             type="button"
-                            onClick={submit}
                           >
                             Forgot password?
                           </button>
+                          </Link>
                           <div style={{ width: "48%" }}>
                             <Link to="/signup">
                               <button

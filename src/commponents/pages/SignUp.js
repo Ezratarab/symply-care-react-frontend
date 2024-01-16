@@ -148,7 +148,6 @@ const SignUp = () => {
                       {renderFormField("street", "Street")}
                       {renderFormField("birthDay", "Birth Day", "date")}
 
-                      {/* New field for Doctor or Patient */}
                       <div
                         className={`form-floating mb-3 ${styles.formFloating}`}
                       >
@@ -161,7 +160,7 @@ const SignUp = () => {
                           value={state.userType}
                           onChange={handleInputChange}
                         >
-                          <option value="" disabled>
+                          <option value="">
                             Select an option
                           </option>
                           <option value="Doctor">Doctor</option>

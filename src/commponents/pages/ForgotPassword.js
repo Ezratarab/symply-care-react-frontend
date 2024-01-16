@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import styles from "./ContactUs.module.css";
+import styles from "./ForgotPassword.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { Link } from "react-router-dom";
-import backgroundImage from '../assets/contactus.jpg';
+import backgroundImage from "../assets/contactus.jpg";
 
-const ContactUs = () => {
+const ForgotPassword = () => {
   const defaultState = {
-    text:"",
-    id:"",
+    text: "",
+    id: "",
     textError: "",
     IdError: "",
   };
@@ -39,7 +39,7 @@ const ContactUs = () => {
     }
 
     if (textError || IdError) {
-      setState({ ...state, textError,IdError });
+      setState({ ...state, textError, IdError });
       return false;
     }
 
@@ -57,11 +57,11 @@ const ContactUs = () => {
     <div className={styles.app}>
       <div className={`container-fluid ${styles.psMd0}`}>
         <div className="row g-0">
-        <div
-            className={`d-none d-md-flex col-md-4 col-lg-6 ${styles.bgImage}`}
+          <div
+            className={`d-none d-md-flex col-md-6 col-lg-6 ${styles.bgImage}`}
             style={{ backgroundImage: `url(${backgroundImage})` }}
           ></div>
-          <div className="col-md-8 col-lg-6">
+          <div className="col-md-6 col-lg-6">
             <div
               className={`login d-flex align-items-center py-5 ${styles.container}`}
             >
@@ -71,7 +71,7 @@ const ContactUs = () => {
                     className={`col-md-9 col-lg-8 mx-auto ${styles.loginForm}`}
                   >
                     <h3 className={`login-heading mb-4 ${styles.loginHeading}`}>
-                      Let us know if you have any questions!
+                      Reset Password
                     </h3>
 
                     <form>
@@ -95,25 +95,19 @@ const ContactUs = () => {
                         </span>
                       </div>
 
-                      
-                      <div
-                        className={`form-floating mb-3 ${styles.formFloating}`}
-                      >
+                      <div className={`form-check mb-3 ${styles.formCheck}`}>
                         <input
-                          type="text"
-                          className={`form-control ${styles.input} ${
-                            state.textError ? styles.invalid : ""
-                          }`}
-                          id="floatingText"
-                          name="text"
-                          placeholder="Your Message"
-                          value={state.text}
-                          onChange={handleInputChange}
+                          className="form-check-input"
+                          type="checkbox"
+                          value=""
+                          id="rememberPasswordCheck"
                         />
-                        <label htmlFor="floatingPassword">Your Message</label>
-                        <span className={`text-danger ${styles.textError}`}>
-                          {state.textError}
-                        </span>
+                        <label
+                          className={`form-check-label ${styles.checkboxLabel}`}
+                          htmlFor="rememberPasswordCheck"
+                        >
+                          Remember password
+                        </label>
                       </div>
 
                       <div className={`d-grid ${styles.grid}`}>
@@ -122,7 +116,7 @@ const ContactUs = () => {
                           type="button"
                           onClick={submit}
                         >
-                          Send
+                          reset password
                         </button>
                       </div>
                     </form>
@@ -137,4 +131,4 @@ const ContactUs = () => {
   );
 };
 
-export default ContactUs;
+export default ForgotPassword;

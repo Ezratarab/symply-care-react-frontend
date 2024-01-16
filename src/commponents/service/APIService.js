@@ -4,6 +4,7 @@ import axios from 'axios';
 const DOCTORS_LIST_URL = "http://localhost:8080/doctors/doctors";
 const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
 const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient";
+const GET_PATIENT_URL = "http://localhost:8080/patients/patient"
 
 
 
@@ -20,6 +21,9 @@ class APIService {
     deletePatient(id){
         console.log("hi");
         return axios.delete(`${DELETE_PATIENT_URL}${id}`);
+    }
+    getPatient(id){
+        return axios.get(`${GET_PATIENT_URL}${id}`)
     }
 
 }

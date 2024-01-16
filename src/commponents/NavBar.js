@@ -6,7 +6,8 @@ import logo from "./assets/symply_care_new.png";
 import { UserContext } from "./Context";
 
 export default function NavBar() {
-  const { isLogin } = useContext(UserContext);
+  const { isLogin , setIsLogin} = useContext(UserContext);
+
   return (
     <div>
       <div className={styles.navBar}>
@@ -19,7 +20,8 @@ export default function NavBar() {
         </ul>
         <ul className={styles.others}>
           <li>
-            <Link to="/login">Log-In</Link>
+            <Link to="/login" >{{isLogin}?"Log-Out":"Log-In"}</Link>
+            
           </li>
           <li>
             <Link to="/doctors/doctors">Our Doctors</Link>
