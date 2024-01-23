@@ -23,6 +23,7 @@ import ContactUs from "./commponents/pages/ContactUs";
 import Personal from "./commponents/pages/Personal";
 import { UserProvider } from "./commponents/Context";
 import ForgotPassword from "./commponents/pages/ForgotPassword";
+import LogOut from "./commponents/pages/LogOut";
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/contactus" element={<ContactUs/>} />
           <Route path="/forgotPassword" element={<ForgotPassword/>} />
           <Route path="/" element={<ForgotPassword/>} />
+          <Route path="/logout" element={<LogOut/>} />
           <Route exact path="/" element={<Navigate to="/home" />} />
         </Routes>
         </UserProvider>
