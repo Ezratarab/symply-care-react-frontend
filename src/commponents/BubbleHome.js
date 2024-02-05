@@ -1,16 +1,52 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styles from "./BubbleHome.module.css";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "./Context";
+import authServiceInstance from "./service/APIService";
+import { URLsContext, UserContext } from "./Context";
+import authServicehelpers from "./service/AuthServiceHelpers";
 
 export default function BubbleHome() {
   const { isLogin } = useContext(UserContext);
+  const { PATIENT_PROFILE_URL, DOCTOR_PROFILE_URL } = useContext(URLsContext);
   const navigate = useNavigate();
+  const [userId, setUserId] = useState("");
+  const [userRoles, setUserRoles] = useState([]);
+
+  useEffect(() => {
+    async function getUser() {
+      if (isLogin) {
+        try {
+          const userStorage = authServicehelpers.getCurrentUser();
+          setUserRoles(userStorage.roles)
+          const response = await authServiceInstance.getPatientByEmail(
+            userStorage.sub
+          );
+          const user = response.data;
+          setUserId(user.id);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else {
+        setUserId("");
+      }
+    }
+    getUser();
+  }, [isLogin]);
+
 
   function handleClickButtons() {
-    isLogin ? navigate("/home") : navigate("/login");
+    if (isLogin) {
+      if (userRoles.length === 1) {
+        if (userRoles[0] === "PATIENT") {
+          navigate(`${PATIENT_PROFILE_URL}${userId}`);
+        }
+        if (userRoles[0] === "DOCTOR") {
+          navigate(`${DOCTOR_PROFILE_URL}${userId}`);
+        }
+      }
+    } else {
+      navigate("/login");
+    }
   }
 
   return (
@@ -18,7 +54,7 @@ export default function BubbleHome() {
       <button onClick={handleClickButtons}>Schedule an appointment</button>
       <button onClick={handleClickButtons}>Change an appointment</button>
       <button onClick={handleClickButtons}>Test results</button>
-      <button onClick={() => navigate("/doctors/doctors")}>Doctors</button>
+      <button onClick={handleClickButtons}>Your Profile</button>
     </div>
   );
 }

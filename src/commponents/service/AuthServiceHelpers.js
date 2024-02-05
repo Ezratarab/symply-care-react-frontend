@@ -27,6 +27,7 @@ class AuthServiceHelpers {
         console.warn('User role not found.');
         return null;
     }
+    
 
 
 // helper method, Check if user is authenticated

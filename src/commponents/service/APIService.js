@@ -1,16 +1,14 @@
-import React from 'react'
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
-//import AuthServiceHelpers from "./AuthServiceHelpers";
+
 
 const API_URL = 'http://localhost:8080';
 
 const DOCTORS_LIST_URL = "http://localhost:8080/doctors/doctors";
 const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
-const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient";
-const GET_PATIENT_URL = "http://localhost:8080/patients/patient"
-
-
+const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient/";
+const GET_PATIENT_ID_URL = "http://localhost:8080/patients/patient/I";
+const GET_PATIENT_EMAIL_URL = "http://localhost:8080/patients/patient/E";
 
 class APIService {
     
@@ -26,8 +24,11 @@ class APIService {
         console.log("hi");
         return axios.delete(`${DELETE_PATIENT_URL}${id}`);
     }
-    getPatient(id){
-        return axios.get(`${GET_PATIENT_URL}${id}`)
+    getPatientById(id){
+        return axios.get(`${GET_PATIENT_ID_URL}${id}`)
+    }
+    getPatientByEmail(email){
+        return axios.get(`${GET_PATIENT_EMAIL_URL}${email}`)
     }
     login(email, password) {
         return axios

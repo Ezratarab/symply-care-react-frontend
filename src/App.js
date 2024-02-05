@@ -4,12 +4,7 @@ import Doctors from "./commponents/pages/Doctors";
 import Home from "./commponents/pages/Home";
 import LogIn from "./commponents/pages/LogIn";
 import PatientList from "./commponents/PatientsList";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import SignUp from "./commponents/pages/SignUp";
 import About from "./commponents/pages/About";
 import NavBar from "./commponents/NavBar";
@@ -18,6 +13,7 @@ import ContactUs from "./commponents/pages/ContactUs";
 import { UserProvider } from "./commponents/Context";
 import ForgotPassword from "./commponents/pages/ForgotPassword";
 import LogOut from "./commponents/pages/LogOut";
+import Profile from "./commponents/pages/Profile";
 
 function App() {
   return (
@@ -39,7 +35,9 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/forgotPassword" element={<ForgotPassword />} />
             <Route path="/logout" element={<LogOut />} />
-            <Route path="/" element={<Navigate replace to="/home"/>} />
+            <Route path={`/patients/patient/:id`} element={<Profile />} />
+            <Route path={`/doctors/doctor/:id`} element={<Profile />} />
+            <Route path="/" element={<Navigate replace to="/home" />} />
           </Routes>
         </UserProvider>
       </BrowserRouter>

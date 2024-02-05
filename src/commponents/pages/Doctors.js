@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Doctor from "../../Doctor";
-import profile1 from "../assets/profile-1.png";
-import profile2 from "../assets/profile-2.png";
-import profile3 from "../assets/profile-3.png";
-import profile4 from "../assets/profile-4.png";
 import "./Doctors.css";
 import APIService from "../service/APIService";
 
 function Doctors() {
-
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
     async function fetchDoctors() {
       try {
         const response = await APIService.getAllDoctors();
-        setDoctors(response.data); 
+        setDoctors(response.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
       }
@@ -38,54 +33,17 @@ function Doctors() {
         </p>
       </div>
       <div className="dt-cards-content">
-      {doctors.map((doctor) => (
+        {doctors.map((doctor) => (
           <Doctor
-            key={doctor.id} 
-            img={doctor.imageData} 
-            name={`${doctor.firstName} ${doctor.lastName}`}
+            key={doctor.id}
+            img={`data:image/jpeg;base64,${doctor.imageData}`} // Here's the corrected img attribute
+            name={`Dr. ${doctor.firstName} ${doctor.lastName}`}
             title={doctor.specialization}
-            stars={doctor.rating} 
-            reviews={doctor.reviews} 
+            stars={doctor.rating}
+            reviews={doctor.reviews}
             experience={doctor.experience}
           />
         ))}
-        </div>
-      <div className="dt-cards-content">
-        <Doctor
-          img={profile1}
-          name="Dr. Kathryn Murphy"
-          title="General Surgeons"
-          stars="4.9"
-          reviews="1800"
-          experience="5"
-        />
-        <Doctor
-          img={profile2}
-          name="Dr. Jacob Jones"
-          title="Hematologists"
-          stars="4.8"
-          reviews="700"
-          experience="2"
-
-        />
-        <Doctor
-          img={profile3}
-          name="Dr. Jenny Wilson"
-          title="Endocrinologists"
-          stars="4.7"
-          reviews="450"
-          experience="1"
-
-        />
-        <Doctor
-          img={profile4}
-          name="Dr. Albert Flores"
-          title="Hematologists"
-          stars="4.8"
-          reviews="500"
-          experience="9"
-
-        />
       </div>
     </div>
   );

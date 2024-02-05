@@ -1,38 +1,55 @@
-import React, { useContext } from "react";
-import { Link, useNavigate, } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./NavBar.module.css";
 import logo from "./assets/symply_care_new.png";
 import authServiceInstance from "./service/APIService";
 import { UserContext } from "./Context";
+import authServicehelpers from "./service/AuthServiceHelpers";
 
 export default function NavBar() {
   const { isLogin, setIsLogin } = useContext(UserContext);
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
-  
-  function handleLogOut(){
-    authServiceInstance.logout()
-    .then(
-      (response) => {
 
-          console.log('LogOut successful')
-          console.log('Response data:', response.data);
-          navigate('/home');
-          window.location.reload();
-          console.log('LogOut successful');
-          handleLoginLogout()
+  useEffect(() => {
+    async function getUser() {
+      if (isLogin) {
+        try {
+          const userStorage = authServicehelpers.getCurrentUser();
+          const response = await authServiceInstance.getPatientByEmail(userStorage.sub);
+          const user = response.data;
+          setUserName(user.firstName);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else {
+        setUserName(""); 
+      }
+    }
+    getUser();
+  }, [isLogin]);
+  
+
+  function handleLogOut() {
+    authServiceInstance.logout().then(
+      (response) => {
+        console.log("LogOut successful");
+        console.log("Response data:", response.data);
+        navigate("/home");
+        window.location.reload();
+        console.log("LogOut successful");
+        handleLoginLogout();
       },
       (error) => {
-          console.error('LogOut error:', error);
-          navigate('/LogIn');
+        console.error("LogOut error:", error);
+        navigate("/LogIn");
       }
-  );
+    );
   }
 
   function handleLoginLogout() {
-    // Assuming isLogin is a boolean indicating whether the user is logged in or not
-    setIsLogin(!isLogin); // Toggle the login state
+    setIsLogin(!isLogin);
   }
-
 
   return (
     <div>
@@ -47,13 +64,9 @@ export default function NavBar() {
         <ul className={styles.others}>
           <li>
             {isLogin ? (
-              <Link onClick={handleLogOut}>
-                Log-Out
-              </Link>
+              <Link onClick={handleLogOut}>Log-Out</Link>
             ) : (
-              <Link to="/login">
-                Log-In
-              </Link>
+              <Link to="/login">Log-In</Link>
             )}
           </li>
           <li>
@@ -65,6 +78,13 @@ export default function NavBar() {
           <li>
             <Link to="/contactus">Contact Us</Link>
           </li>
+        </ul>
+        <ul className={styles.logo}>
+          {isLogin && (
+            <li>
+              <Link>Your Profile {userName}</Link>
+            </li>
+          )}
         </ul>
       </div>
     </div>
