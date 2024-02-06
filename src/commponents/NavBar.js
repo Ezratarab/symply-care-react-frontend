@@ -35,17 +35,17 @@ export default function NavBar() {
       (response) => {
         console.log("LogOut successful");
         console.log("Response data:", response.data);
-        navigate("/home");
-        window.location.reload();
-        console.log("LogOut successful");
-        handleLoginLogout();
+        navigate("/home").then(() => {
+          console.log("logout2");
+          handleLoginLogout();
+        });
       },
       (error) => {
         console.error("LogOut error:", error);
-        navigate("/LogIn");
+        navigate("/login");
       }
     );
-  }
+  }  
 
   function handleLoginLogout() {
     setIsLogin(!isLogin);
@@ -78,13 +78,6 @@ export default function NavBar() {
           <li>
             <Link to="/contactus">Contact Us</Link>
           </li>
-        </ul>
-        <ul className={styles.logo}>
-          {isLogin && (
-            <li>
-              <Link>Your Profile {userName}</Link>
-            </li>
-          )}
         </ul>
       </div>
     </div>

@@ -9,6 +9,8 @@ const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
 const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient/";
 const GET_PATIENT_ID_URL = "http://localhost:8080/patients/patient/I";
 const GET_PATIENT_EMAIL_URL = "http://localhost:8080/patients/patient/E";
+const GET_DOCTOR_ID_URL = "http://localhost:8080/doctors/doctor/I";
+const GET_DOCTOR_EMAIL_URL = "http://localhost:8080/doctors/doctor/E";
 
 class APIService {
     
@@ -29,6 +31,12 @@ class APIService {
     }
     getPatientByEmail(email){
         return axios.get(`${GET_PATIENT_EMAIL_URL}${email}`)
+    }
+    getDoctorById(id){
+        return axios.get(`${GET_DOCTOR_ID_URL}${id}`)
+    }
+    getDoctorByEmail(email){
+        return axios.get(`${GET_DOCTOR_EMAIL_URL}${email}`)
     }
     login(email, password) {
         return axios

@@ -1,3 +1,69 @@
-.main{
-    border-color: blue;
+.main {
+  display: grid;
+  border: 0.2rem solid gray;
+  margin: 20px;
+}
+.title {
+  border: 0.2rem solid blue;
+  grid-column: 1;
+  display: grid;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+.name {
+  margin-left: 20px; /* Adjust the margin as needed */
+  font-size: 20px; /* Adjust the font size as needed */
+  border: 0.2rem solid green;
+  height: 50%;
+  margin-top: 60px;
+  margin-left: -10px;;
+  position: relative;
+  font-size: 40px;
+  font-weight: bold;
+}
+.description {
+  border: 0.2rem solid red;
+  grid-column: 3;
+  width: 700px;
+  margin-right: 20px;
+  margin-top: 20px;
+}
+.image {
+  width: 3cm; /* Set the width to 4 cm */
+  height: 3cm; /* Set the height to 4 cm */
+  overflow: hidden; /* Ensure the image remains within the circle */
+  border-radius: 50%; /* Make the container circular */
+  margin: 2rem;
+  grid-column: 1;
+}
+
+.profileImage {
+  width: 100%; 
+  height: auto; /* Maintain the aspect ratio of the image */
+}
+.profile{
+    border: 0.2rem solid yellow;
+    display: flex;
+}
+
+.title h1{
+    font-size: larger;
+}
+
+.information{
+    grid-row: 2;
+    margin: 20px;
+    font-size: medium;
+}
+
+.right{
+    border-right: 0.2em solid black;
+    height:100%;
+}
+
+.appointments{
+    position: relative;
+    margin-top: 70px;
+    border: 0.2rem solid yellow;
+
 }

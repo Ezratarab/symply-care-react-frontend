@@ -17,10 +17,17 @@ export default function BubbleHome() {
       if (isLogin) {
         try {
           const userStorage = authServicehelpers.getCurrentUser();
-          setUserRoles(userStorage.roles)
-          const response = await authServiceInstance.getPatientByEmail(
-            userStorage.sub
-          );
+          const response = null;
+          setUserRoles(userStorage.roles);
+          if (userRoles[0] === "PATIENT") {
+            response = await authServiceInstance.getPatientByEmail(
+              userStorage.sub
+            );
+          } else if (userRoles[0] === "DOCTOR") {
+            response = await authServiceInstance.getDoctorByEmail(
+              userStorage.sub
+            );
+          }
           const user = response.data;
           setUserId(user.id);
         } catch (error) {
@@ -33,14 +40,13 @@ export default function BubbleHome() {
     getUser();
   }, [isLogin]);
 
-
   function handleClickButtons() {
     if (isLogin) {
       if (userRoles.length === 1) {
         if (userRoles[0] === "PATIENT") {
           navigate(`${PATIENT_PROFILE_URL}${userId}`);
-        }
-        if (userRoles[0] === "DOCTOR") {
+        } else if (userRoles[0] === "DOCTOR") {
+          console.log(userId);
           navigate(`${DOCTOR_PROFILE_URL}${userId}`);
         }
       }
