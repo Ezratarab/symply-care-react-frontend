@@ -16,18 +16,24 @@ export default function NavBar() {
       if (isLogin) {
         try {
           const userStorage = authServicehelpers.getCurrentUser();
-          const response = await authServiceInstance.getPatientByEmail(userStorage.sub);
+          let response;
+          if (userStorage.roles[0] === "PATIENT") {
+            response = await authServiceInstance.getPatientByEmail(userStorage.sub);
+          } else if (userStorage.roles[0] === "DOCTOR") {
+            response = await authServiceInstance.getDoctorByEmail(userStorage.sub);
+          }
           const user = response.data;
           setUserName(user.firstName);
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
       } else {
-        setUserName(""); 
+        setUserName("");
       }
     }
     getUser();
   }, [isLogin]);
+  
   
 
   function handleLogOut() {

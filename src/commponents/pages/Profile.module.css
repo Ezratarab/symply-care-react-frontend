@@ -2,6 +2,10 @@
   display: grid;
   border: 0.2rem solid gray;
   margin: 20px;
+  background-color: rgb(189, 219, 240);
+
+  border-radius: 2rem;
+  box-shadow: 0 0 25px;
 }
 .title {
   border: 0.2rem solid blue;
@@ -16,7 +20,7 @@
   border: 0.2rem solid green;
   height: 50%;
   margin-top: 60px;
-  margin-left: -10px;;
+  margin-left: -10px;
   position: relative;
   font-size: 40px;
   font-weight: bold;
@@ -35,35 +39,47 @@
   border-radius: 50%; /* Make the container circular */
   margin: 2rem;
   grid-column: 1;
+
+  position: relative;
 }
 
 .profileImage {
-  width: 100%; 
-  height: auto; /* Maintain the aspect ratio of the image */
-}
-.profile{
-    border: 0.2rem solid yellow;
-    display: flex;
-}
+  width: 100%;
+  height: 100%; /* Maintain the aspect ratio of the image */
 
-.title h1{
-    font-size: larger;
+  object-fit: cover; /* for image to fill container */
+}
+.profile {
+  border: 0.2rem solid yellow;
+  display: flex;
 }
 
-.information{
-    grid-row: 2;
-    margin: 20px;
-    font-size: medium;
+.title h1 {
+  font-size: larger;
 }
 
-.right{
-    border-right: 0.2em solid black;
-    height:100%;
+.information {
+  grid-row: 2;
+  margin: 20px;
+  font-size: medium;
 }
 
-.appointments{
-    position: relative;
-    margin-top: 70px;
-    border: 0.2rem solid yellow;
+.information p {
+  width: 100%;
+  margin: 0;
+}
 
+.information p span {
+  font-weight: bold;
+}
+
+.right {
+  border-right: 0.2em solid black;
+  height: 100%;
+}
+
+.appointments {
+  position: relative;
+  margin-top: 70px;
+  border: 0.2rem solid yellow;
 }

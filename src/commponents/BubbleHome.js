@@ -17,19 +17,23 @@ export default function BubbleHome() {
       if (isLogin) {
         try {
           const userStorage = authServicehelpers.getCurrentUser();
-          const response = null;
           setUserRoles(userStorage.roles);
-          if (userRoles[0] === "PATIENT") {
+          let response; // Define response variable outside the if-else blocks
+          if (userStorage.roles[0] === "PATIENT") {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
-          } else if (userRoles[0] === "DOCTOR") {
+          } else if (userStorage.roles[0] === "DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );
           }
-          const user = response.data;
-          setUserId(user.id);
+          if (response) { // Check if response is not null before accessing data
+            const user = response.data;
+            setUserId(user.id);
+          } else {
+            console.error("No response received for user data");
+          }
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
@@ -39,7 +43,7 @@ export default function BubbleHome() {
     }
     getUser();
   }, [isLogin]);
-
+  
   function handleClickButtons() {
     if (isLogin) {
       if (userRoles.length === 1) {

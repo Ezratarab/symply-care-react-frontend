@@ -64,18 +64,11 @@ class APIService {
         return user ? user.refreshToken : null;
     }
 
-    // **** Logout user, use the jwt token to invalidate the session on the server
     logout() {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.accessToken && user.refreshToken) {
-            // Stop token refresh
-            // Clear user data from local storage
             localStorage.removeItem('user');
-            // Dispatch custom event to stop token refresh
-           // const event = new Event('refresh-token');
-             // window.dispatchEvent(event);
-            // Invalidate session on server by sending logout request
-            axios.get(`${API_URL}/logout`, {
+            axios.post(`${API_URL}/logout`, null, {
                 headers: {
                     Authorization: `Bearer ${user.accessToken}`
                 }
