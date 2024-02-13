@@ -18,9 +18,13 @@ export default function NavBar() {
           const userStorage = authServicehelpers.getCurrentUser();
           let response;
           if (userStorage.roles[0] === "PATIENT") {
-            response = await authServiceInstance.getPatientByEmail(userStorage.sub);
+            response = await authServiceInstance.getPatientByEmail(
+              userStorage.sub
+            );
           } else if (userStorage.roles[0] === "DOCTOR") {
-            response = await authServiceInstance.getDoctorByEmail(userStorage.sub);
+            response = await authServiceInstance.getDoctorByEmail(
+              userStorage.sub
+            );
           }
           const user = response.data;
           setUserName(user.firstName);
@@ -33,25 +37,22 @@ export default function NavBar() {
     }
     getUser();
   }, [isLogin]);
-  
-  
 
   function handleLogOut() {
     authServiceInstance.logout().then(
-      (response) => {
+      () => {
         console.log("LogOut successful");
-        console.log("Response data:", response.data);
-        navigate("/home").then(() => {
-          console.log("logout2");
-          handleLoginLogout();
-        });
+        handleLoginLogout(); // Update the login/logout state
+        navigate("/home"); // Navigate to the home page
+        window.location.reload(); // Reload the window (optional)
       },
       (error) => {
         console.error("LogOut error:", error);
-        navigate("/login");
+        navigate("/login"); // Navigate to the login page if logout fails
+        window.location.reload();
       }
     );
-  }  
+  }
 
   function handleLoginLogout() {
     setIsLogin(!isLogin);

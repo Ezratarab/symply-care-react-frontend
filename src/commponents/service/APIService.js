@@ -11,6 +11,8 @@ const GET_PATIENT_ID_URL = "http://localhost:8080/patients/patient/I";
 const GET_PATIENT_EMAIL_URL = "http://localhost:8080/patients/patient/E";
 const GET_DOCTOR_ID_URL = "http://localhost:8080/doctors/doctor/I";
 const GET_DOCTOR_EMAIL_URL = "http://localhost:8080/doctors/doctor/E";
+const SIGNUP_DOCTOR_URL = "http://localhost:8080/doctors/addDoctor";
+const SIGNUP_PATIENT_URL = "http://localhost:8080/patients/addPatient";
 
 class APIService {
     
@@ -57,6 +59,47 @@ class APIService {
                 return response.data;
             });
     }
+    signup(newUser,userType) {
+        if(userType === "Doctor"){
+            return axios
+            .post(`${SIGNUP_DOCTOR_URL}`, {newUser})
+            .then((response) => {
+                if (response.data.accessToken) {
+                    // Decode the token to get user details and roles
+                    const decodedToken = jwtDecode(response.data.accessToken);
+                    const user = {
+                        accessToken: response.data.accessToken,
+                        refreshToken: response.data.refreshToken,
+                        roles: decodedToken.roles
+                    };
+
+                    // Save the user object to local storage
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+                return response.data;
+            });
+        }
+        else if(userType === "Patient"){
+            console.log("its patient");
+            return axios
+            .post(`${SIGNUP_PATIENT_URL}`, {newUser})
+            .then((response) => {
+                if (response.data.accessToken) {
+                    // Decode the token to get user details and roles
+                    const decodedToken = jwtDecode(response.data.accessToken);
+                    const user = {
+                        accessToken: response.data.accessToken,
+                        refreshToken: response.data.refreshToken,
+                        roles: decodedToken.roles
+                    };
+
+                    // Save the user object to local storage
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+                return response.data;
+            });
+        }
+    }
 
     // helper method, Get refresh token from local storage
     getRefreshToken() {
@@ -68,7 +111,7 @@ class APIService {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.accessToken && user.refreshToken) {
             localStorage.removeItem('user');
-            axios.post(`${API_URL}/logout`, null, {
+            axios.post(`${API_URL}`, null, {
                 headers: {
                     Authorization: `Bearer ${user.accessToken}`
                 }

@@ -1,31 +1,34 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styles from "./SignUp.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import Doctor from "../../Doctor";
+import { UserContext } from "../Context";
+import { useNavigate } from "react-router-dom";
+import authServiceInstance from "../service/APIService";
 
 const SignUp = () => {
   const defaultState = {
-    name: null,
-    email: null,
-    password: null,
-    firstName: null,
-    lastName: null,
-    city: null,
-    country: null,
-    street: null,
-    birthDay: null,
-    userType: null, // Added field for Doctor or Patient selection
-    IdError: null,
-    passwordError: null,
-    firstNameError: null,
-    lastNameError: null,
-    emailError: null,
-    cityError: null,
-    countryError: null,
-    streetError: null,
-    birthDayError: null,
-    userTypeError: null,
+    name: "",
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    city: "",
+    country: "",
+    street: "",
+    birthDay: "",
+    userType: "",
+    IdError: "",
+    passwordError: "",
+    firstNameError: "",
+    lastNameError: "",
+    emailError: "",
+    cityError: "",
+    countryError: "",
+    streetError: "",
+    birthDayError: "",
+    userTypeError: "",
     specialization: "",
     hospital: "",
     HMO: "",
@@ -33,6 +36,8 @@ const SignUp = () => {
   };
 
   const [state, setState] = useState(defaultState);
+  const navigate = useNavigate();
+  const { isLogin, setIsLogin } = useContext(UserContext);
 
   const handleInputChange = (event) => {
     const target = event.target;
@@ -45,38 +50,70 @@ const SignUp = () => {
     });
   };
 
+  const buildNewUser = (state) => {
+    const newUser = {
+      "id": state.id,
+      "firstName": state.firstName,
+      "lastName": state.lastName,
+      "email": state.email,
+      "password": state.password,
+      "city": state.city,
+      "country": state.country,
+      "street": state.street,
+      "birthDay": state.birthDay,
+      "imageData": null,
+      "inquiriesList": [],
+      "doctors": [],
+      "appointments": [],
+    };
+    console.log(newUser);
+    return newUser;
+};
+
   const validate = () => {
-    let errors = {};
-    const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const errors = {};
 
-    const fields = [
-      "id",
-      "password",
-      "firstName",
-      "lastName",
-      "email",
-      "city",
-      "country",
-      "street",
-      "birthDay",
-      "userType",
-      "specialization",
-      "hospital",
-      "HMO",
-      "experience",
-    ];
+    // Define validation rules for each field
+    const validationRules = {
+      id: {
+        required: true,
+        pattern: /^\d+$/,
+        errorMessage: "ID field must contain only digits",
+      },
+      password: { required: true },
+      firstName: { required: true },
+      lastName: { required: true },
+      email: {
+        required: true,
+        pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        errorMessage: "Invalid email format",
+      },
+      city: { required: true },
+      country: { required: true },
+      street: { required: true },
+      birthDay: { required: true },
+      userType: { required: true },
+      specialization: { required: false },
+      hospital: { required: false },
+      HMO: { required: false },
+      experience: { required: false },
+    };
 
-    fields.forEach((field) => {
-      if (
-        !state[field] ||
-        (field === "id" && reg.test(state[field]) === false)
-      ) {
-        errors[`${field}Error`] = `${
-          field.charAt(0).toUpperCase() + field.slice(1)
-        } field is invalid or required`;
+    // Validate each field based on the defined rules
+    Object.keys(validationRules).forEach((fieldName) => {
+      const rule = validationRules[fieldName];
+      const value = state[fieldName];
+
+      if (rule.required && !value) {
+        errors[`${fieldName}Error`] = `${
+          fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+        } field is required`;
+      } else if (rule.pattern && !rule.pattern.test(value)) {
+        errors[`${fieldName}Error`] = rule.errorMessage || "Invalid format";
       }
     });
 
+    // Update state with errors, if any
     if (Object.keys(errors).length > 0) {
       setState({ ...state, ...errors });
       return false;
@@ -85,10 +122,32 @@ const SignUp = () => {
     return true;
   };
 
-  const submit = () => {
+  function handleLoginLogout() {
+    // Assuming isLogin is a boolean indicating whether the user is logged in or not
+    setIsLogin(!isLogin); // Toggle the login state
+  }
+
+  const submit = async (event) => {
+    event.preventDefault();
     if (validate()) {
-      console.warn(state);
-      setState(defaultState);
+      try {
+        console.warn(state);
+        setState(defaultState);
+        const response = await authServiceInstance.signup(
+          buildNewUser(state),
+          state.userType
+        );
+        console.log("SignUp successful");
+        console.log(response);
+        console.log("Response data:", response.data);
+        navigate("/home");
+        window.location.reload();
+        console.log("Signup successful");
+        handleLoginLogout();
+      } catch (error) {
+        console.error("SignUp error:", error);
+        navigate("/signup");
+      }
     }
   };
 
@@ -102,9 +161,10 @@ const SignUp = () => {
         id={`floating${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`}
         name={fieldName}
         placeholder={placeholder}
-        value={state[fieldName]}
+        value={state[fieldName] || ""}
         onChange={handleInputChange}
       />
+
       <label
         htmlFor={`floating${
           fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
@@ -160,9 +220,7 @@ const SignUp = () => {
                           value={state.userType}
                           onChange={handleInputChange}
                         >
-                          <option value="">
-                            Select an option
-                          </option>
+                          <option value="">Select an option</option>
                           <option value="Doctor">Doctor</option>
                           <option value="Patient">Patient</option>
                         </select>

@@ -13,7 +13,8 @@ import ContactUs from "./commponents/pages/ContactUs";
 import { UserProvider } from "./commponents/Context";
 import ForgotPassword from "./commponents/pages/ForgotPassword";
 import LogOut from "./commponents/pages/LogOut";
-import Profile from "./commponents/pages/Profile";
+import PatientProfile from "./commponents/pages/PatientProfile";
+import DoctorProfile from "./commponents/pages/DoctorProfile";
 
 function App() {
   return (
@@ -35,8 +36,8 @@ function App() {
             <Route path="/contactus" element={<ContactUs />} />
             <Route path="/forgotPassword" element={<ForgotPassword />} />
             <Route path="/logout" element={<LogOut />} />
-            <Route path={`/patients/patient/:id`} element={<Profile />} />
-            <Route path={`/doctors/doctor/:id`} element={<Profile />} />
+            <Route path={`/patients/patient/:id`} element={<PatientProfile />} />
+            <Route path={`/doctors/doctor/:id`} element={<DoctorProfile />} />
             <Route path="/" element={<Navigate replace to="/home" />} />
           </Routes>
         </UserProvider>

@@ -1,14 +1,13 @@
 .main {
   display: grid;
+  grid-template-columns: 40% auto; /* 40% for information, the rest for description */
   border: 0.2rem solid gray;
   margin: 20px;
   background-color: rgb(189, 219, 240);
-
   border-radius: 2rem;
   box-shadow: 0 0 25px;
 }
 .title {
-  border: 0.2rem solid blue;
   grid-column: 1;
   display: grid;
   margin-left: 20px;
@@ -17,7 +16,6 @@
 .name {
   margin-left: 20px; /* Adjust the margin as needed */
   font-size: 20px; /* Adjust the font size as needed */
-  border: 0.2rem solid green;
   height: 50%;
   margin-top: 60px;
   margin-left: -10px;
@@ -26,11 +24,9 @@
   font-weight: bold;
 }
 .description {
-  border: 0.2rem solid red;
-  grid-column: 3;
   width: 700px;
-  margin-right: 20px;
-  margin-top: 20px;
+  margin-left: 50px;
+  margin-top: 50px;
 }
 .image {
   width: 3cm; /* Set the width to 4 cm */
@@ -50,7 +46,6 @@
   object-fit: cover; /* for image to fill container */
 }
 .profile {
-  border: 0.2rem solid yellow;
   display: flex;
 }
 
@@ -65,8 +60,8 @@
 }
 
 .information p {
-  width: 100%;
-  margin: 0;
+  width: 80%;
+  margin-top: 2px;
 }
 
 .information p span {
@@ -74,12 +69,38 @@
 }
 
 .right {
-  border-right: 0.2em solid black;
   height: 100%;
+  width: 70%;
 }
 
 .appointments {
-  position: relative;
   margin-top: 70px;
-  border: 0.2rem solid yellow;
+  width:500px;
+  border: 0.2rem solid red;
+}
+ 
+.appointments> div:nth-child(1){
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.testResults> div:nth-child(1){
+  font-weight: bold;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.appointmentsButtons{
+  margin-left: 9px;
+  height: 40px;
+}
+
+.newAppointment{
+  margin-top:20px
+}
+
+.appointment{
+  display:flex;
 }
