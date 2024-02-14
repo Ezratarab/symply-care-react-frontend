@@ -61,9 +61,13 @@ export default function PatientProfile() {
       [fieldName]: value,
       [`${fieldName}Error`]: "",
     }));
-    console.log(state["newAppointmentDate"]);
-    console.log(state["newAppointmentTime"]);
+    console.log(state["newDoctor"]);
+    
   };
+  const handleSelectChange = (event) => {
+    state["newDoctor"] = event.target.value;
+  };
+  
 
   const handleAddDoctor = () => {
     if (state.newDoctor !== "") {
@@ -400,7 +404,7 @@ export default function PatientProfile() {
             </button>
           )}
         </div>
-        <div>
+        <div className={styles.addDoctors}> 
           <p>If you want To add Doctors, please select Doctor:</p>
           <select
             className={`form-select ${styles.input} ${
@@ -408,7 +412,7 @@ export default function PatientProfile() {
             }`}
             id="floatingNewDoctor"
             name="newDoctor"
-            onChange={handleInputChange}
+            value={state["newDoctor"]} onChange={handleSelectChange}
           >
             <option value="">Select a Doctor</option>
             {user &&
@@ -417,6 +421,7 @@ export default function PatientProfile() {
                 <option
                   key={doctor.id}
                   value={`${doctor.firstName} ${doctor.lastName}`}
+
                 >
                   {doctor.firstName} {doctor.lastName}
                 </option>

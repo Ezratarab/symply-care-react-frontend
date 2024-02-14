@@ -9,7 +9,7 @@ import authServiceInstance from "../service/APIService";
 
 const SignUp = () => {
   const defaultState = {
-    name: "",
+    id: "",
     email: "",
     password: "",
     firstName: "",
@@ -43,7 +43,7 @@ const SignUp = () => {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-
+    console.log(value);
     setState({
       ...state,
       [name]: value,
@@ -52,23 +52,23 @@ const SignUp = () => {
 
   const buildNewUser = (state) => {
     const newUser = {
-      "id": state.id,
-      "firstName": state.firstName,
-      "lastName": state.lastName,
-      "email": state.email,
-      "password": state.password,
-      "city": state.city,
-      "country": state.country,
-      "street": state.street,
-      "birthDay": state.birthDay,
-      "imageData": null,
-      "inquiriesList": [],
-      "doctors": [],
-      "appointments": [],
+      id: state.id,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      email: state.email,
+      password: state.password,
+      city: state.city,
+      country: state.country,
+      street: state.street,
+      birthDay: state.birthDay,
+      imageData: null,
+      inquiriesList: [],
+      doctors: [],
+      appointments: [],
     };
     console.log(newUser);
     return newUser;
-};
+  };
 
   const validate = () => {
     const errors = {};
@@ -221,8 +221,12 @@ const SignUp = () => {
                           onChange={handleInputChange}
                         >
                           <option value="">Select an option</option>
-                          <option value="Doctor">Doctor</option>
-                          <option value="Patient">Patient</option>
+                          <option value="Doctor" key="doctor">
+                            Doctor
+                          </option>
+                          <option value="Patient" key="patient">
+                            Patient
+                          </option>
                         </select>
                         <label htmlFor="floatingUserType">
                           Are you a Doctor or a Patient?
@@ -232,12 +236,14 @@ const SignUp = () => {
                         </span>
                       </div>
 
-                      {state.userType === "Doctor" && [
-                        renderFormField("specialization", "Specialization"),
-                        renderFormField("hospital", "Hospital"),
-                        renderFormField("HMO", "HMO"),
-                        renderFormField("experience", "Experience"),
-                      ]}
+                      {state.userType === "Doctor" && (
+                        <>
+                          {renderFormField("specialization", "Specialization")}
+                          {renderFormField("hospital", "Hospital")}
+                          {renderFormField("HMO", "HMO")}
+                          {renderFormField("experience", "Experience")}
+                        </>
+                      )}
 
                       {renderFormField("password", "Password")}
 

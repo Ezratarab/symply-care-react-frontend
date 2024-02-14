@@ -44,7 +44,7 @@ export default function NavBar() {
         console.log("LogOut successful");
         handleLoginLogout(); // Update the login/logout state
         navigate("/home"); // Navigate to the home page
-        window.location.reload(); // Reload the window (optional)
+        window.location.reload();
       },
       (error) => {
         console.error("LogOut error:", error);

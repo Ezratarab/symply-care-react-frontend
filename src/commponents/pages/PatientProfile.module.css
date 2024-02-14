@@ -76,7 +76,7 @@
 .appointments {
   margin-top: 70px;
   width:500px;
-  border: 0.2rem solid red;
+  margin-bottom: 70px;
 }
  
 .appointments> div:nth-child(1){
@@ -103,4 +103,8 @@
 
 .appointment{
   display:flex;
+}
+
+.addDoctors{
+  margin-bottom: 70px;
 }

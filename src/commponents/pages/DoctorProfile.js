@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import styles from "./DoctorProfile.module.css";
+import styles from "./PatientProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
@@ -21,10 +21,11 @@ export default function DoctorProfile() {
   const [startDate, setStartDate] = useState(null);
   const [addDeleteAppointmentMode, setAddDeleteAppointmentMode] =
     useState(false);
-  const [newAppointmentDate, setNewAppointmentDate] = useState("");
-  const [newAppointmentTime, setNewAppointmentTime] = useState("");
 
-  const [doctors, setDoctors] = useState([]);
+
+  const [patients, setPatients] = useState([]);
+  const [doctorsList, setDoctorsList] = useState([]);
+  const [patientsList, setPatientsList] = useState([]);
 
   const defaultState = {
     id: "",
@@ -35,6 +36,7 @@ export default function DoctorProfile() {
     country: "",
     street: "",
     birthDate: "",
+    newPatient: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
     newAppointmentTimeError: "",
@@ -42,6 +44,7 @@ export default function DoctorProfile() {
     idError: "",
     firstNameError: "",
     lastNameError: "",
+    newPatientError: "",
     emailError: "",
     cityError: "",
     countryError: "",
@@ -58,9 +61,32 @@ export default function DoctorProfile() {
       [fieldName]: value,
       [`${fieldName}Error`]: "",
     }));
-    console.log(state["newAppointmentDate"]);
-    console.log(state["newAppointmentTime"]);
+    console.log(state["newPatient"]);
+    
   };
+  const handleSelectChange = (event) => {
+    state["newPatient"] = event.target.value;
+  };
+  
+
+  const handleAddPatient = () => {
+    if (state.newPatient !== "") {
+      const selectedPatient = patients.find(
+        (patient) =>
+          `${patient.firstName} ${patient.lastName}` === state.newPatient
+      );
+  
+      setPatients((prevPatients) => [...prevPatients, selectedPatient]);
+  
+      // Reset the newDoctor state after adding the doctor
+      setState((prevState) => ({
+        ...prevState,
+        newPatient: "" // Reset newDoctor to empty string
+      }));
+    }
+  };
+  
+  
 
   useEffect(() => {
     async function getUser() {
@@ -77,10 +103,10 @@ export default function DoctorProfile() {
               userStorage.sub
             );
           }
-          if (response) {
+          if (response && userStorage.roles[0] === "DOCTOR") {
             const user = response.data;
             setUser(user);
-            console.log(user);
+            setPatients(user.patients);
             setState({
               id: user.id || "",
               firstName: user.firstName || "",
@@ -103,10 +129,27 @@ export default function DoctorProfile() {
         setState(defaultState);
       }
     }
+    async function fetchDoctors() {
+      try {
+        const response = await APIService.getAllDoctors();
+        setDoctorsList(response.data);
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+      }
+    }
+    async function fetchPatients() {
+      try {
+        const response = await APIService.getAllPatients();
+        setPatientsList(response.data);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+      }
+    }
+    fetchPatients();
+    fetchDoctors();
     getUser();
   }, [isLogin]);
 
-  const handleEditAppointment = (index) => {};
 
   const handleDeleteAppointment = (index) => {
     setUser((prevUser) => {
@@ -177,7 +220,7 @@ export default function DoctorProfile() {
               {user?.firstName ?? ""} {user?.lastName ?? ""}
             </div>
           </div>
-          <h1>Have a good Work!</h1>
+          <h1>Have a good work!</h1>
         </div>
         <div className={styles.information}>
           <p>
@@ -278,7 +321,7 @@ export default function DoctorProfile() {
                 }`}
                 value={state.birthDate}
                 name="birthDate"
-                onChange={handleInputChange}
+                
               />
             ) : (
               <span>{user?.birthDate ?? ""}</span>
@@ -302,17 +345,52 @@ export default function DoctorProfile() {
             id="floatingUserType"
             name="userType"
             value={state.userType}
-            onChange={handleInputChange}
+            
           >
             <option value="">Select an option</option>
-            {doctors.map((doctor) => (
-              <option
-                key={doctor.id}
-                value={`${doctor.firstName} ${doctor.lastName}`}
-              >
-                To: {doctor.firstName} {doctor.lastName}
-              </option>
-            ))}
+            {user &&
+              doctorsList &&
+              doctorsList.map((doctor) => (
+                <option
+                  key={doctor.id}
+                  value={`${doctor.firstName} ${doctor.lastName}`}
+                >
+                  To: {doctor.firstName} {doctor.lastName}
+                </option>
+              ))}
+          </select>
+
+          {renderFormField(
+            "Description",
+            "Describe what you're feeling",
+            "text"
+          )}
+        </div>
+        <div>
+          <p>
+            You can send to your patients you want a message
+          </p>
+          <p>please choose a patient and describe your message:</p>
+          <select
+            className={`form-select ${styles.input} ${
+              state.userTypeError ? styles.invalid : ""
+            }`}
+            id="floatingUserType"
+            name="userType"
+            value={state.userType}
+           
+          >
+            <option value="">Select an option</option>
+            {user &&
+              patients &&
+              patients.map((patient) => (
+                <option
+                  key={patient.id}
+                  value={`${patient.firstName} ${patient.lastName}`}
+                >
+                  To: {patient.firstName} {patient.lastName}
+                </option>
+              ))}
           </select>
 
           {renderFormField(
@@ -361,6 +439,32 @@ export default function DoctorProfile() {
               Add / Delete Appointment
             </button>
           )}
+        </div>
+        <div className={styles.addDoctors}> 
+          <p>If you want To add Patients, please select Patient:</p>
+          <select
+            className={`form-select ${styles.input} ${
+              state.userTypeError ? styles.invalid : ""
+            }`}
+            id="floatingNewDoctor"
+            name="newDoctor"
+            value={state["newDoctor"]} onChange={handleSelectChange}
+          >
+            <option value="">Select a Patient</option>
+            {user &&
+              patientsList &&
+              patientsList.map((patient) => (
+                <option
+                  key={patient.id}
+                  value={`${patient.firstName} ${patient.lastName}`}
+
+                >
+                  {patient.firstName} {patient.lastName}
+                </option>
+              ))}
+          </select>
+
+          <button onClick={handleAddPatient}>Add Patient</button>
         </div>
       </div>
     </div>
