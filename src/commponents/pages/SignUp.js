@@ -29,6 +29,10 @@ const SignUp = () => {
     streetError: "",
     birthDayError: "",
     userTypeError: "",
+    hospitalError: "",
+    specializationError: "",
+    HMOError: "",
+    experienceError: "",
     specialization: "",
     hospital: "",
     HMO: "",
@@ -50,7 +54,31 @@ const SignUp = () => {
     });
   };
 
-  const buildNewUser = (state) => {
+  const buildNewDoctor = (state) => {
+    const newUser = {
+      id: state.id,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      email: state.email,
+      password: state.password,
+      city: state.city,
+      country: state.country,
+      street: state.street,
+      birthDay: state.birthDay,
+      imageData: null,
+      specialization: state.specialization,
+      hospital: state.hospital,
+      HMO: state.HMO,
+      experience: state.experience,
+      inquiriesList: [],
+      patients: [],
+      appointments: [],
+    };
+    console.log(newUser);
+    return newUser;
+  };
+
+  const buildNewPatient = (state) => {
     const newUser = {
       id: state.id,
       firstName: state.firstName,
@@ -69,11 +97,9 @@ const SignUp = () => {
     console.log(newUser);
     return newUser;
   };
-
   const validate = () => {
     const errors = {};
 
-    // Define validation rules for each field
     const validationRules = {
       id: {
         required: true,
@@ -93,10 +119,6 @@ const SignUp = () => {
       street: { required: true },
       birthDay: { required: true },
       userType: { required: true },
-      specialization: { required: false },
-      hospital: { required: false },
-      HMO: { required: false },
-      experience: { required: false },
     };
 
     // Validate each field based on the defined rules
@@ -128,15 +150,24 @@ const SignUp = () => {
   }
 
   const submit = async (event) => {
+    const response = null;
+    console.log(state);
     event.preventDefault();
     if (validate()) {
       try {
         console.warn(state);
         setState(defaultState);
-        const response = await authServiceInstance.signup(
-          buildNewUser(state),
-          state.userType
-        );
+        if (state.userType === "Patient") {
+          response = await authServiceInstance.signup(
+            buildNewPatient(state),
+            state.userType
+          );
+        } else if (state.userType === "Doctor") {
+          response = await authServiceInstance.signup(
+            buildNewDoctor(state),
+            state.userType
+          );
+        }
         console.log("SignUp successful");
         console.log(response);
         console.log("Response data:", response.data);

@@ -12,6 +12,8 @@ const GET_DOCTOR_ID_URL = "http://localhost:8080/doctors/doctor/I";
 const GET_DOCTOR_EMAIL_URL = "http://localhost:8080/doctors/doctor/E";
 const SIGNUP_DOCTOR_URL = "http://localhost:8080/doctors/addDoctor";
 const SIGNUP_PATIENT_URL = "http://localhost:8080/patients/addPatient";
+const UPDATE_PATIENT_URL = "http://localhost:8080/patients/updatePatient/";
+const UPDATE_DOCTOR_URL = "http://localhost:8080/doctors/updateDoctor/";
 
 class APIService {
   getAllDoctors() {
@@ -38,6 +40,40 @@ class APIService {
   getDoctorByEmail(email) {
     return axios.get(`${GET_DOCTOR_EMAIL_URL}${email}`);
   }
+  async updatePatientDetails(user) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    console.log("came to here with: ", {user});
+    try {
+      const response = await axios.put(`${UPDATE_PATIENT_URL}${user.id}`, user, { headers });
+  
+      if (response && response.data) {
+        return response.data; 
+      } else {
+        throw new Error('Empty response or missing data');
+      }
+    } catch (error) {
+      console.error('Error updating patient details:', error);
+      throw error; 
+    }
+  }
+  
+  async updateDoctorDetails(user) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    try {
+      const response = await axios.put(`${UPDATE_DOCTOR_URL}${user.id}`, user, { headers });
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error updating patient details:', error);
+      throw error; 
+    }
+  }
+  
   login(email, password) {
     return axios
       .post(`${API_URL}/login`, { email, password })
@@ -58,9 +94,12 @@ class APIService {
       });
   }
   signup(newUser, userType) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
     if (userType === "Doctor") {
       return axios
-        .post(`${SIGNUP_DOCTOR_URL}`, { newUser })
+        .post(`${SIGNUP_DOCTOR_URL}`, { newUser },{headers})
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles
@@ -79,7 +118,7 @@ class APIService {
     } else if (userType === "Patient") {
       console.log("its patient");
       return axios
-        .post(`${SIGNUP_PATIENT_URL}`, { newUser })
+        .post(`${SIGNUP_PATIENT_URL}`, { newUser },{headers})
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles
@@ -128,6 +167,8 @@ class APIService {
       }
     });
   }
+
+  
 }
 const authServiceInstance = new APIService(); // Create an instance of AuthServiceAxios
 export default authServiceInstance; // Export the instance as the default export

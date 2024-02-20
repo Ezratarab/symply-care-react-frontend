@@ -26,6 +26,7 @@ export default function PatientProfile() {
 
   const [doctors, setDoctors] = useState([]);
   const [doctorsList, setDoctorsList] = useState([]);
+  const [initialUserState, setInitialUserState] = useState(null);
 
   const defaultState = {
     id: "",
@@ -35,8 +36,10 @@ export default function PatientProfile() {
     city: "",
     country: "",
     street: "",
-    birthDate: "",
+    birthDay: "",
     newDoctor: "",
+    inquiriesList: "",
+    inquiriesListError: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
     newAppointmentTimeError: "",
@@ -49,7 +52,29 @@ export default function PatientProfile() {
     cityError: "",
     countryError: "",
     streetError: "",
-    birthDateError: "",
+    birthDayError: "",
+    doctors: "",
+    doctorsError: "",
+  };
+
+  const buildUpdatedPatient = (user) => {
+    const newUser = {
+      id: user.id,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      email: user.email,
+      password: state.password,
+      city: state.city,
+      country: state.country,
+      street: state.street,
+      birthDay: state.birthDay,
+      imageData: state.imageData,
+      inquiriesList: user.inquiriesList,
+      doctors: user.doctors,
+      appointments: user.appointments,
+    };
+    console.log(newUser);
+    return newUser;
   };
 
   const [state, setState] = useState(defaultState);
@@ -61,34 +86,59 @@ export default function PatientProfile() {
       [fieldName]: value,
       [`${fieldName}Error`]: "",
     }));
-    console.log(state["newDoctor"]);
-    
   };
   const handleSelectChange = (event) => {
-    state["newDoctor"] = event.target.value;
+    setState((prevState) => ({
+      ...prevState,
+      newDoctor: event.target.value,
+    }));
   };
-  
 
   const handleAddDoctor = () => {
     if (state.newDoctor !== "") {
       // Find the selected doctor object from the doctorsList
       const selectedDoctor = doctorsList.find(
-        (doctor) =>
-          `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
+        (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
-  
+
       // Update the setDoctors to include the selected doctor
       setDoctors((prevDoctors) => [...prevDoctors, selectedDoctor]);
-  
+
       // Reset the newDoctor state after adding the doctor
       setState((prevState) => ({
         ...prevState,
-        newDoctor: "" // Reset newDoctor to empty string
+        newDoctor: "", // Reset newDoctor to empty string
       }));
     }
   };
-  
-  
+  const updatePatient = async () => {
+    console.log("hi");
+    const updatedPatient = buildUpdatedPatient(user);
+    try {
+      const response = await APIService.updatePatientDetails(updatedPatient);
+      console.log("Patient details updated successfully:", response);
+      setUser(response.data);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating patient details:", error);
+    }
+  };
+  const isEqual = (obj1, obj2) => {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    for (const key of keys1) {
+      if (obj1[key] !== obj2[key]) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     async function getUser() {
@@ -109,6 +159,7 @@ export default function PatientProfile() {
             const user = response.data;
             setUser(user);
             setDoctors(user.doctors);
+            setInitialUserState(user);
             console.log(user.doctors);
             console.log(user);
             setState({
@@ -119,7 +170,7 @@ export default function PatientProfile() {
               city: user.city || "",
               country: user.country || "",
               street: user.street || "",
-              birthDate: user.birthDate || "",
+              birthDate: user.birthDay || "",
               ...defaultState,
             });
           } else {
@@ -232,9 +283,10 @@ export default function PatientProfile() {
                 className={`form-control ${styles.input} ${
                   state.firstNameError ? styles.invalid : ""
                 }`}
-                value={editMode ? state.firstName : user?.firstName ?? ""}
                 name="firstName"
-                onChange={handleInputChange}
+                placeholder={user.firstName}
+                value={state.firstName}
+                onChange={(event) => handleInputChange(event, "firstName")}
               />
             ) : (
               <span>{user?.firstName ?? ""}</span>
@@ -248,9 +300,10 @@ export default function PatientProfile() {
                 className={`form-control ${styles.input} ${
                   state.lastNameError ? styles.invalid : ""
                 }`}
-                value={state.lastName}
                 name="lastName"
-                onChange={handleInputChange}
+                placeholder={user.lastName}
+                value={state.lastName}
+                onChange={(event) => handleInputChange(event, "lastName")}
               />
             ) : (
               <span>{user?.lastName ?? ""}</span>
@@ -268,9 +321,10 @@ export default function PatientProfile() {
                 className={`form-control ${styles.input} ${
                   state.cityError ? styles.invalid : ""
                 }`}
-                value={state.city}
                 name="city"
-                onChange={handleInputChange}
+                placeholder={user.city}
+                value={state.city}
+                onChange={(event) => handleInputChange(event, "city")}
               />
             ) : (
               <span>{user?.city ?? ""}</span>
@@ -284,9 +338,10 @@ export default function PatientProfile() {
                 className={`form-control ${styles.input} ${
                   state.countryError ? styles.invalid : ""
                 }`}
-                value={state.country}
                 name="country"
-                onChange={handleInputChange}
+                placeholder={user.country}
+                value={state.country}
+                onChange={(event) => handleInputChange(event, "country")}
               />
             ) : (
               <span>{user?.country ?? ""}</span>
@@ -300,9 +355,11 @@ export default function PatientProfile() {
                 className={`form-control ${styles.input} ${
                   state.streetError ? styles.invalid : ""
                 }`}
-                value={state.street}
+                id={`floatingStreet`}
                 name="street"
-                onChange={handleInputChange}
+                placeholder={user.street}
+                value={state.street}
+                onChange={(event) => handleInputChange(event, "street")}
               />
             ) : (
               <span>{user?.street ?? ""}</span>
@@ -312,19 +369,29 @@ export default function PatientProfile() {
             <span className={styles.label}>Birth Date:</span>{" "}
             {editMode ? (
               <input
-                type="text"
+                type="date"
                 className={`form-control ${styles.input} ${
-                  state.birthDateError ? styles.invalid : ""
+                  state.birthDayError ? styles.invalid : ""
                 }`}
-                value={state.birthDate}
-                name="birthDate"
-                onChange={handleInputChange}
+                name="birthDay"
+                placeholder={user.birthDay}
+                value={state.birthDay}
+                onChange={(event) => handleInputChange(event, "birthDay")}
               />
             ) : (
-              <span>{user?.birthDate ?? ""}</span>
+              <span>{user?.birthDay ?? ""}</span>
             )}
           </p>
-          <button onClick={() => setEditMode((prevEditMode) => !prevEditMode)}>
+          <button
+            onClick={() => {
+              if (editMode) {
+                if (!isEqual(initialUserState, state)) {
+                  updatePatient();
+                }
+              }
+              setEditMode((prevEditMode) => !prevEditMode);
+            }}
+          >
             {editMode ? "Save" : "Edit"}
           </button>
         </div>
@@ -362,6 +429,8 @@ export default function PatientProfile() {
             "Describe what you're feeling",
             "text"
           )}
+
+          <button>send</button>
         </div>
         <div className={styles.appointments}>
           <div>Here's your Scheduled appointments</div>
@@ -404,7 +473,7 @@ export default function PatientProfile() {
             </button>
           )}
         </div>
-        <div className={styles.addDoctors}> 
+        <div className={styles.addDoctors}>
           <p>If you want To add Doctors, please select Doctor:</p>
           <select
             className={`form-select ${styles.input} ${
@@ -412,7 +481,8 @@ export default function PatientProfile() {
             }`}
             id="floatingNewDoctor"
             name="newDoctor"
-            value={state["newDoctor"]} onChange={handleSelectChange}
+            value={state["newDoctor"]}
+            onChange={handleSelectChange}
           >
             <option value="">Select a Doctor</option>
             {user &&
@@ -421,7 +491,6 @@ export default function PatientProfile() {
                 <option
                   key={doctor.id}
                   value={`${doctor.firstName} ${doctor.lastName}`}
-
                 >
                   {doctor.firstName} {doctor.lastName}
                 </option>
