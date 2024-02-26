@@ -17,13 +17,8 @@ export default function PatientProfile() {
   const { isLogin } = useContext(UserContext);
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [editAppointmentMode, setEditAppointmentMode] = useState(false);
-  const [startDate, setStartDate] = useState(null);
   const [addDeleteAppointmentMode, setAddDeleteAppointmentMode] =
     useState(false);
-  const [newAppointmentDate, setNewAppointmentDate] = useState("");
-  const [newAppointmentTime, setNewAppointmentTime] = useState("");
-
   const [doctors, setDoctors] = useState([]);
   const [doctorsList, setDoctorsList] = useState([]);
   const [initialUserState, setInitialUserState] = useState(null);
@@ -39,6 +34,7 @@ export default function PatientProfile() {
     birthDay: "",
     newDoctor: "",
     inquiriesList: "",
+    selectedDoctor: "",
     inquiriesListError: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
@@ -46,6 +42,7 @@ export default function PatientProfile() {
     newAppointmentDateError: "",
     idError: "",
     firstNameError: "",
+    selectedDoctorError: "",
     lastNameError: "",
     newDoctorError: "",
     emailError: "",
@@ -80,6 +77,7 @@ export default function PatientProfile() {
   const [state, setState] = useState(defaultState);
 
   const handleInputChange = (event, fieldName) => {
+    console.log(state.userType);
     const { value } = event.target;
     setState((prevState) => ({
       ...prevState,
@@ -94,20 +92,20 @@ export default function PatientProfile() {
     }));
   };
 
-  const handleAddDoctor = () => {
+  const handleAddDoctor = async () => {
     if (state.newDoctor !== "") {
-      // Find the selected doctor object from the doctorsList
       const selectedDoctor = doctorsList.find(
         (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
-
-      // Update the setDoctors to include the selected doctor
-      setDoctors((prevDoctors) => [...prevDoctors, selectedDoctor]);
-
-      // Reset the newDoctor state after adding the doctor
+      console.log(user.id, selectedDoctor.id);
+      const response = await APIService.addDoctorToPatient(
+        user.id,
+        selectedDoctor.id
+      );
+      console.log(response);
       setState((prevState) => ({
         ...prevState,
-        newDoctor: "", // Reset newDoctor to empty string
+        newDoctor: "",
       }));
     }
   };
@@ -197,8 +195,6 @@ export default function PatientProfile() {
     getUser();
   }, [isLogin]);
 
-  const handleEditAppointment = (index) => {};
-
   const handleDeleteAppointment = (index) => {
     setUser((prevUser) => {
       const updatedAppointments = [...prevUser.appointments];
@@ -210,15 +206,31 @@ export default function PatientProfile() {
     });
   };
 
-  const handleAddDeleteAppointment = (event) => {
+  const handleAddDeleteAppointment = async (event) => {
     event.preventDefault();
-    const date = state.newAppointmentDate + " " + state.newAppointmentTime;
-    console.log(date);
-    const newAppointment = { date };
-
+    if (state.newDoctor !== "") {
+      const selectedDoctor = doctorsList.find(
+        (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
+      );
+      const date = state.newAppointmentDate + " " + state.newAppointmentTime;
+      console.log(user.id, selectedDoctor.id, date);
+      try {
+        const response = await APIService.addAppointmentToPatient(
+          user.id,
+          state.newDoctor.id,
+          date
+        );
+        console.log("Patient appointment added successfully:", response);
+        setUser(response.data);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error adding patient appointment:", error);
+      }
+    }
     setUser((prevUser) => ({
       ...prevUser,
-      appointments: [...prevUser.appointments, newAppointment],
+      newAppointmentDate: "",
+      newAppointmentTime: "",
     }));
     console.log(user.appointments);
   };
@@ -404,12 +416,12 @@ export default function PatientProfile() {
           <p>please choose a doctor and explain your symptoms:</p>
           <select
             className={`form-select ${styles.input} ${
-              state.userTypeError ? styles.invalid : ""
+              state.selectedDoctorError ? styles.invalid : ""
             }`}
-            id="floatingUserType"
-            name="userType"
-            value={state.userType}
-            onChange={handleInputChange}
+            id="floatingSelectedDoctor"
+            name="selectedDoctor"
+            value={state.selectedDoctor}
+            onChange={(event) => handleInputChange(event, "selectedDoctor")}
           >
             <option value="">Select an option</option>
             {user &&
@@ -448,25 +460,48 @@ export default function PatientProfile() {
           ))}
 
           {addDeleteAppointmentMode ? (
-            <form
-              onSubmit={handleAddDeleteAppointment}
-              className={styles.newAppointment}
-            >
-              {renderFormField(
-                "newAppointmentDate",
-                "Appointment Date",
-                "Date"
-              )}
-              {renderFormField(
-                "newAppointmentTime",
-                "Appointment Time",
-                "Time"
-              )}
-              <button type="submit">Add</button>
-              <button onClick={() => setAddDeleteAppointmentMode(false)}>
-                Done
-              </button>
-            </form>
+            <>
+              <select
+                className={`form-select ${styles.input} ${
+                  state.selectedDoctorError ? styles.invalid : ""
+                }`}
+                id="floatingSelectedDoctor"
+                name="selectedDoctor"
+                value={state.selectedDoctor}
+                onChange={(event) => handleInputChange(event, "selectedDoctor")}
+              >
+                <option value="">Select an option</option>
+                {user &&
+                  doctors &&
+                  doctors.map((doctor) => (
+                    <option
+                      key={doctor.id}
+                      value={`${doctor.firstName} ${doctor.lastName}`}
+                    >
+                      With: {doctor.firstName} {doctor.lastName}
+                    </option>
+                  ))}
+              </select>
+              <form
+                onSubmit={handleAddDeleteAppointment}
+                className={styles.newAppointment}
+              >
+                {renderFormField(
+                  "newAppointmentDate",
+                  "Appointment Date",
+                  "Date"
+                )}
+                {renderFormField(
+                  "newAppointmentTime",
+                  "Appointment Time",
+                  "Time"
+                )}
+                <button type="submit">Add</button>
+                <button onClick={() => setAddDeleteAppointmentMode(false)}>
+                  Done
+                </button>
+              </form>
+            </>
           ) : (
             <button onClick={() => setAddDeleteAppointmentMode(true)}>
               Add / Delete Appointment

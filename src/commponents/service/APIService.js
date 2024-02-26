@@ -3,6 +3,8 @@ import { jwtDecode } from "jwt-decode";
 
 const API_URL = "http://localhost:8080";
 
+const BASE_PATIENTS_URL = "http://localhost:8080/patients/";
+const BASE_DOCTORS_URL = "http://localhost:8080/doctors/";
 const DOCTORS_LIST_URL = "http://localhost:8080/doctors/doctors";
 const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
 const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient/";
@@ -59,17 +61,50 @@ class APIService {
     }
   }
   
-  async updateDoctorDetails(user) {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
+  async addDoctorToPatient(patientID,doctorID) {
+    console.log(doctorID);
     try {
-      const response = await axios.put(`${UPDATE_DOCTOR_URL}${user.id}`, user, { headers });
+      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patientID}/addDoctor`, doctorID);
       if (response && response.data) {
         return response.data;
       }
     } catch (error) {
-      console.error('Error updating patient details:', error);
+      console.error('Error adding Doctor To patient:', error);
+      throw error; 
+    }
+  }
+  async addPatientToDoctor(doctorID,patientID) {
+    console.log(doctorID);
+    try {
+      const response = await axios.post(`${BASE_DOCTORS_URL}doctor/${doctorID}/addPatient`, patientID);
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding Patient To Doctor:', error);
+      throw error; 
+    }
+  }
+
+  async addAppointmentToPatient(patientID,doctorID,date) {
+    try {
+      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patientID}/addAppointment`, {doctorID}, {date});
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding Appointment To patient:', error);
+      throw error; 
+    }
+  }
+  async addAppointmentToDoctor(doctorID,patientID,date) {
+    try {
+      const response = await axios.post(`${BASE_DOCTORS_URL}doctor/${doctorID}/addAppointment`, {patientID}, {date});
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding Appointment To Doctor:', error);
       throw error; 
     }
   }
