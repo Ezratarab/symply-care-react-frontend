@@ -86,9 +86,14 @@ class APIService {
     }
   }
 
-  async addAppointmentToPatient(patientID,doctorID,date) {
+  async addAppointmentToPatient(patient,doctor,date) {
+    console.log("came to here to!!!!!!!!");
     try {
-      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patientID}/addAppointment`, {doctorID}, {date});
+      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patient.id}/addAppointment`,{
+        doctor: doctor,
+        patient: patient,
+        date: date
+    });
       if (response && response.data) {
         return response.data;
       }

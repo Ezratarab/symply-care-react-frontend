@@ -207,22 +207,24 @@ export default function PatientProfile() {
   };
 
   const handleAddDeleteAppointment = async (event) => {
-    event.preventDefault();
-    if (state.newDoctor !== "") {
+    console.log("came to here!");
+    console.log(state.selectedDoctor);
+    if (state.selectedDoctor !== "") {
       const selectedDoctor = doctorsList.find(
-        (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
+        (doctor) =>
+          `${doctor.firstName} ${doctor.lastName}` === state.selectedDoctor
       );
+      console.log(selectedDoctor);
       const date = state.newAppointmentDate + " " + state.newAppointmentTime;
-      console.log(user.id, selectedDoctor.id, date);
+      console.log(user, selectedDoctor, date);
       try {
         const response = await APIService.addAppointmentToPatient(
-          user.id,
-          state.newDoctor.id,
+          user,
+          state.selectedDoctor,
           date
         );
         console.log("Patient appointment added successfully:", response);
         setUser(response.data);
-        window.location.reload();
       } catch (error) {
         console.error("Error adding patient appointment:", error);
       }
@@ -482,10 +484,7 @@ export default function PatientProfile() {
                     </option>
                   ))}
               </select>
-              <form
-                onSubmit={handleAddDeleteAppointment}
-                className={styles.newAppointment}
-              >
+              <form className={styles.newAppointment}>
                 {renderFormField(
                   "newAppointmentDate",
                   "Appointment Date",
@@ -496,7 +495,9 @@ export default function PatientProfile() {
                   "Appointment Time",
                   "Time"
                 )}
-                <button type="submit">Add</button>
+                <button type="button" onClick={handleAddDeleteAppointment}>
+                  Add
+                </button>
                 <button onClick={() => setAddDeleteAppointmentMode(false)}>
                   Done
                 </button>
