@@ -63,8 +63,11 @@ class APIService {
   
   async addDoctorToPatient(patientID,doctorID) {
     console.log(doctorID);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
     try {
-      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patientID}/addDoctor`, doctorID);
+      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patientID}/addDoctor`, {doctorID},{headers});
       if (response && response.data) {
         return response.data;
       }
@@ -75,8 +78,11 @@ class APIService {
   }
   async addPatientToDoctor(doctorID,patientID) {
     console.log(doctorID);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
     try {
-      const response = await axios.post(`${BASE_DOCTORS_URL}doctor/${doctorID}/addPatient`, patientID);
+      const response = await axios.post(`${BASE_DOCTORS_URL}doctor/${doctorID}/addPatient`, {patientID}, {headers});
       if (response && response.data) {
         return response.data;
       }
@@ -85,15 +91,37 @@ class APIService {
       throw error; 
     }
   }
+  async addInquiryToPatient(patient,doctor,description) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    try {
+      const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patient.id}/addInquiry`, {
+        doctor: {doctor},
+        patient: {patient},
+        symptoms: {description}
+    }, {headers});
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error adding Inquiry To Patient:', error);
+      throw error; 
+    }
+  }
+
 
   async addAppointmentToPatient(patient,doctor,date) {
     console.log("came to here to!!!!!!!!");
+    const headers = {
+      'Content-Type': 'application/json',
+    };
     try {
       const response = await axios.post(`${BASE_PATIENTS_URL}patient/${patient.id}/addAppointment`,{
-        doctor: doctor,
-        patient: patient,
-        date: date
-    });
+        doctor: {doctor},
+        patient: {patient},
+        date: {date}
+    }, {headers});
       if (response && response.data) {
         return response.data;
       }

@@ -22,6 +22,7 @@ export default function PatientProfile() {
   const [doctors, setDoctors] = useState([]);
   const [doctorsList, setDoctorsList] = useState([]);
   const [initialUserState, setInitialUserState] = useState(null);
+  const [userType, setUserType] = useState("");
 
   const defaultState = {
     id: "",
@@ -34,15 +35,19 @@ export default function PatientProfile() {
     birthDay: "",
     newDoctor: "",
     inquiriesList: "",
-    selectedDoctor: "",
+    selectedDoctorForMessage: "",
+    selectedDoctorForAppointment: "",
     inquiriesListError: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
+    description: "",
+    descriptionError: "",
     newAppointmentTimeError: "",
     newAppointmentDateError: "",
     idError: "",
     firstNameError: "",
-    selectedDoctorError: "",
+    selectedDoctorForMessageError: "",
+    selectedDoctorForAppointmentError: "",
     lastNameError: "",
     newDoctorError: "",
     emailError: "",
@@ -77,8 +82,9 @@ export default function PatientProfile() {
   const [state, setState] = useState(defaultState);
 
   const handleInputChange = (event, fieldName) => {
-    console.log(state.userType);
+    console.log(userType);
     const { value } = event.target;
+    console.log(value);
     setState((prevState) => ({
       ...prevState,
       [fieldName]: value,
@@ -148,10 +154,12 @@ export default function PatientProfile() {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
+            setUserType("Patient");
           } else if (userStorage.roles[0] === "DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );
+            setUserType("Doctor");
           }
           if (response) {
             const user = response.data;
@@ -198,21 +206,45 @@ export default function PatientProfile() {
   const handleDeleteAppointment = (index) => {
     setUser((prevUser) => {
       const updatedAppointments = [...prevUser.appointments];
-      updatedAppointments.splice(index, 1); // Remove the appointment at the specified index
+      updatedAppointments.splice(index, 1);
       return {
         ...prevUser,
         appointments: updatedAppointments,
       };
     });
   };
+  const handleAddInquiry = async () => {
+    const selectedDoctor = state.selectedDoctorForMessage;
+    const description = state.description;
+    if (selectedDoctor && description) {
+      const selectedDoctor = doctorsList.find(
+        (doctor) =>
+          `${doctor.firstName} ${doctor.lastName}` ===
+          state.selectedDoctorForAppointment
+      );
+      try {
+        const response = await APIService.addInquiryToPatient(
+          user,
+          selectedDoctor,
+          description
+        );
+        console.log("Inquiry added successfully:", response);
+      } catch (error) {
+        console.error("Error adding inquiry:", error);
+      }
+    } else {
+      console.error("Please select a doctor and provide a description.");
+    }
+  };
 
   const handleAddDeleteAppointment = async (event) => {
     console.log("came to here!");
-    console.log(state.selectedDoctor);
-    if (state.selectedDoctor !== "") {
+    console.log(state.selectedDoctorForAppointment);
+    if (state.selectedDoctorForAppointment !== "") {
       const selectedDoctor = doctorsList.find(
         (doctor) =>
-          `${doctor.firstName} ${doctor.lastName}` === state.selectedDoctor
+          `${doctor.firstName} ${doctor.lastName}` ===
+          state.selectedDoctorForAppointment
       );
       console.log(selectedDoctor);
       const date = state.newAppointmentDate + " " + state.newAppointmentTime;
@@ -220,7 +252,7 @@ export default function PatientProfile() {
       try {
         const response = await APIService.addAppointmentToPatient(
           user,
-          state.selectedDoctor,
+          selectedDoctor,
           date
         );
         console.log("Patient appointment added successfully:", response);
@@ -248,7 +280,7 @@ export default function PatientProfile() {
         name={fieldName}
         placeholder={placeholder}
         value={state[fieldName] || ""}
-        onChange={(event) => handleInputChange(event, fieldName)} // Modified onChange handler
+        onChange={(event) => handleInputChange(event, fieldName)}
       />
 
       <label
@@ -418,12 +450,14 @@ export default function PatientProfile() {
           <p>please choose a doctor and explain your symptoms:</p>
           <select
             className={`form-select ${styles.input} ${
-              state.selectedDoctorError ? styles.invalid : ""
+              state.selectedDoctorForMessageError ? styles.invalid : ""
             }`}
             id="floatingSelectedDoctor"
-            name="selectedDoctor"
-            value={state.selectedDoctor}
-            onChange={(event) => handleInputChange(event, "selectedDoctor")}
+            name="selectedDoctorForMessage"
+            value={state.selectedDoctorForMessage}
+            onChange={(event) =>
+              handleInputChange(event, "selectedDoctorForMessage")
+            }
           >
             <option value="">Select an option</option>
             {user &&
@@ -439,12 +473,14 @@ export default function PatientProfile() {
           </select>
 
           {renderFormField(
-            "Description",
+            "description",
             "Describe what you're feeling",
             "text"
           )}
 
-          <button>send</button>
+          <button type="buttom" onClick={handleAddInquiry}>
+            send
+          </button>
         </div>
         <div className={styles.appointments}>
           <div>Here's your Scheduled appointments</div>
@@ -465,12 +501,14 @@ export default function PatientProfile() {
             <>
               <select
                 className={`form-select ${styles.input} ${
-                  state.selectedDoctorError ? styles.invalid : ""
+                  state.selectedDoctorForAppointmentError ? styles.invalid : ""
                 }`}
                 id="floatingSelectedDoctor"
-                name="selectedDoctor"
-                value={state.selectedDoctor}
-                onChange={(event) => handleInputChange(event, "selectedDoctor")}
+                name="selectedDoctorForAppointment"
+                value={state.selectedDoctorForAppointment}
+                onChange={(event) =>
+                  handleInputChange(event, "selectedDoctorForAppointment")
+                }
               >
                 <option value="">Select an option</option>
                 {user &&
