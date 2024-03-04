@@ -78,8 +78,18 @@
   width:500px;
   margin-bottom: 70px;
 }
+.inquiries {
+  margin-top: 70px;
+  width:500px;
+  margin-bottom: 70px;
+}
  
 .appointments> div:nth-child(1){
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.inquiries div{
   font-weight: bold;
   margin-bottom: 20px;
 }

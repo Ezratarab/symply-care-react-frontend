@@ -166,7 +166,6 @@ export default function PatientProfile() {
             setUser(user);
             setDoctors(user.doctors);
             setInitialUserState(user);
-            console.log(user.doctors);
             console.log(user);
             setState({
               id: user.id || "",
@@ -482,6 +481,31 @@ export default function PatientProfile() {
             send
           </button>
         </div>
+        <div className={styles.inquiries}>
+          <div>Here are your answered inquiries</div>
+          {user?.inquiriesList?.map((inquiry, index) => (
+            <div key={index} className={styles.inquiry}>
+              {inquiry.hasAnswered ? (
+                <p>{`${inquiry.id}`}</p>
+              ) : null}
+            </div>
+          ))}
+          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
+            <p>No answered inquiries yet</p>
+          )}
+          <div>Here are your unanswered inquiries</div>
+          {user?.inquiriesList?.map((inquiry, index) => (
+            <div key={index} className={styles.inquiry}>
+              {!inquiry.hasAnswered ? (
+                <p>{`${inquiry.id} `}</p>
+              ) : null}
+            </div>
+          ))}
+          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
+            <p>No unanswered inquiries yet</p>
+          )}
+        </div>
+
         <div className={styles.appointments}>
           <div>Here's your Scheduled appointments</div>
           {user?.appointments?.map((appointment, index) => (
