@@ -3,14 +3,8 @@ import styles from "./PatientProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
-import format from "date-fns/format";
-import getDay from "date-fns/getDay";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
-import DatePicker from "react-date-picker";
 import APIService from "../service/APIService";
 
 export default function PatientProfile() {
@@ -19,7 +13,6 @@ export default function PatientProfile() {
   const [editMode, setEditMode] = useState(false);
   const [addDeleteAppointmentMode, setAddDeleteAppointmentMode] =
     useState(false);
-  const [doctors, setDoctors] = useState([]);
   const [doctorsList, setDoctorsList] = useState([]);
   const [initialUserState, setInitialUserState] = useState(null);
   const [userType, setUserType] = useState("");
@@ -34,10 +27,8 @@ export default function PatientProfile() {
     street: "",
     birthDay: "",
     newDoctor: "",
-    inquiriesList: "",
     selectedDoctorForMessage: "",
     selectedDoctorForAppointment: "",
-    inquiriesListError: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
     description: "",
@@ -164,7 +155,6 @@ export default function PatientProfile() {
           if (response) {
             const user = response.data;
             setUser(user);
-            setDoctors(user.doctors);
             setInitialUserState(user);
             console.log(user);
             setState({
@@ -197,7 +187,6 @@ export default function PatientProfile() {
         console.error("Error fetching doctors:", error);
       }
     }
-
     fetchDoctors();
     getUser();
   }, [isLogin]);
@@ -451,7 +440,7 @@ export default function PatientProfile() {
             className={`form-select ${styles.input} ${
               state.selectedDoctorForMessageError ? styles.invalid : ""
             }`}
-            id="floatingSelectedDoctor"
+            id="floatingSelectedDoctorForMessage"
             name="selectedDoctorForMessage"
             value={state.selectedDoctorForMessage}
             onChange={(event) =>
@@ -460,8 +449,8 @@ export default function PatientProfile() {
           >
             <option value="">Select an option</option>
             {user &&
-              doctors &&
-              doctors.map((doctor) => (
+              user.doctors &&
+              user.doctors.map((doctor) => (
                 <option
                   key={doctor.id}
                   value={`${doctor.firstName} ${doctor.lastName}`}
@@ -477,7 +466,7 @@ export default function PatientProfile() {
             "text"
           )}
 
-          <button type="buttom" onClick={handleAddInquiry}>
+          <button type="button" onClick={handleAddInquiry}>
             send
           </button>
         </div>
@@ -536,8 +525,8 @@ export default function PatientProfile() {
               >
                 <option value="">Select an option</option>
                 {user &&
-                  doctors &&
-                  doctors.map((doctor) => (
+                  user.doctors &&
+                  user.doctors.map((doctor) => (
                     <option
                       key={doctor.id}
                       value={`${doctor.firstName} ${doctor.lastName}`}
