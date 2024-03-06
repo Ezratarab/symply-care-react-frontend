@@ -94,16 +94,17 @@ export default function PatientProfile() {
       const selectedDoctor = doctorsList.find(
         (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
-      console.log(user.id, selectedDoctor.id);
+      console.log(user.id, selectedDoctor);
       const response = await APIService.addDoctorToPatient(
         user.id,
-        selectedDoctor.id
+        selectedDoctor
       );
       console.log(response);
       setState((prevState) => ({
         ...prevState,
         newDoctor: "",
       }));
+      window.location.reload();
     }
   };
   const updatePatient = async () => {

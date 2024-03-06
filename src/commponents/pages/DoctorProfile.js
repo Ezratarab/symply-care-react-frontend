@@ -12,14 +12,12 @@ export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [editAppointmentMode, setEditAppointmentMode] = useState(false);
-  const [startDate, setStartDate] = useState(null);
   const [addDeleteAppointmentMode, setAddDeleteAppointmentMode] =
     useState(false);
-
   const [doctorsList, setDoctorsList] = useState([]);
   const [patientsList, setPatientsList] = useState([]);
   const [initialUserState, setInitialUserState] = useState(null);
+  const [userType, setUserType] = useState("");
 
   const defaultState = {
     id: "",
@@ -93,18 +91,43 @@ export default function DoctorProfile() {
   const [state, setState] = useState(defaultState);
 
   const handleInputChange = (event, fieldName) => {
+    console.log(userType);
     const { value } = event.target;
+    console.log(value);
     setState((prevState) => ({
       ...prevState,
       [fieldName]: value,
       [`${fieldName}Error`]: "",
     }));
-    console.log(state["newPatient"]);
   };
   const handleSelectChange = (event) => {
     state["newPatient"] = event.target.value;
   };
-  const handlePatientMessage = () => {};
+
+  const handleDoctorMessage = () => {};
+  const handlePatientMessage = async () => {
+    const selectedDoctor = state.selectedDoctorForMessage;
+    const description = state.description;
+    if (selectedDoctor && description) {
+      const selectedDoctor = doctorsList.find(
+        (doctor) =>
+          `${doctor.firstName} ${doctor.lastName}` ===
+          state.selectedDoctorForAppointment
+      );
+      try {
+        const response = await APIService.addInquiryToPatient(
+          user,
+          selectedDoctor,
+          description
+        );
+        console.log("Inquiry added successfully:", response);
+      } catch (error) {
+        console.error("Error adding inquiry:", error);
+      }
+    } else {
+      console.error("Please select a doctor and provide a description.");
+    }
+  };
 
   const updateDoctor = async () => {
     const updateDoctor = buildUpdatedDoctor(user);
@@ -160,10 +183,12 @@ export default function DoctorProfile() {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
+            setUserType("Patient");
           } else if (userStorage.roles[0] === "DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );
+            setUserType("Doctor");
           }
           if (response && userStorage.roles[0] === "DOCTOR") {
             const user = response.data;
@@ -227,15 +252,34 @@ export default function DoctorProfile() {
     });
   };
 
-  const handleAddDeleteAppointment = (event) => {
-    event.preventDefault();
-    const date = state.newAppointmentDate + " " + state.newAppointmentTime;
-    console.log(date);
-    const newAppointment = { date };
-
+  const handleAddDeleteAppointment = async (event) => {
+    console.log("came to here!");
+    console.log(state.selectedPatientForAppointment);
+    if (state.selectedPatientForAppointment !== "") {
+      const selectedPatient = patientsList.find(
+        (patient) =>
+          `${patient.firstName} ${patient.lastName}` ===
+          state.selectedPatientForAppointment
+      );
+      console.log(selectedPatient);
+      const date = state.newAppointmentDate + " " + state.newAppointmentTime;
+      console.log(user, selectedPatient, date);
+      try {
+        const response = await APIService.addAppointmentToDoctor(
+          user,
+          selectedPatient,
+          date
+        );
+        console.log("Doctor appointment added successfully:", response);
+        setUser(response.data);
+      } catch (error) {
+        console.error("Error adding patient appointment:", error);
+      }
+    }
     setUser((prevUser) => ({
       ...prevUser,
-      appointments: [...prevUser.appointments, newAppointment],
+      newAppointmentDate: "",
+      newAppointmentTime: "",
     }));
     console.log(user.appointments);
   };
@@ -483,9 +527,7 @@ export default function DoctorProfile() {
       </div>
       <div className={styles.description}>
         <div>
-          <p>
-            You can send to the doctor you want the decription of your disease
-          </p>
+          <p>You can send to the doctor you want something</p>
           <select
             className={`form-select ${styles.input} ${
               state.selectedDoctorForMessageError ? styles.invalid : ""
@@ -511,7 +553,9 @@ export default function DoctorProfile() {
           </select>
 
           {renderFormField("doctorText", "Describe...", "text")}
-          <button>send</button>
+          <button type="button" onClick={handleDoctorMessage}>
+            send
+          </button>
         </div>
         <div>
           <p>You can send to your patients you want a message</p>
@@ -523,7 +567,9 @@ export default function DoctorProfile() {
             id="floatingSelectedPatientForMessage"
             name="selectedPatientForMessage"
             value={state.selectedPatientForMessage}
-            onChange={(event) => handleInputChange(event, "selectedPatientForMessage")}
+            onChange={(event) =>
+              handleInputChange(event, "selectedPatientForMessage")
+            }
           >
             <option value="">Select an option</option>
             {user &&
