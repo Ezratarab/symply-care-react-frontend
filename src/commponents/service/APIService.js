@@ -198,6 +198,7 @@ class APIService {
       });
   }
   signup(newUser, userType) {
+    console.log(newUser);
     const headers = {
       "Content-Type": "application/json",
     };
@@ -222,7 +223,7 @@ class APIService {
     } else if (userType === "Patient") {
       console.log("its patient");
       return axios
-        .post(`${SIGNUP_PATIENT_URL}`, { newUser }, { headers })
+        .post(`${SIGNUP_PATIENT_URL}`, newUser , { headers })
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles

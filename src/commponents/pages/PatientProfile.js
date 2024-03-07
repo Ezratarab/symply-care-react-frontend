@@ -232,6 +232,7 @@ export default function PatientProfile() {
           description
         );
         console.log("Inquiry added successfully:", response);
+        window.location.reload();
       } catch (error) {
         console.error("Error adding inquiry:", error);
       }
