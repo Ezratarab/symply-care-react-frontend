@@ -94,19 +94,31 @@ export default function PatientProfile() {
       const selectedDoctor = doctorsList.find(
         (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
-      console.log(user.id, selectedDoctor);
-      const response = await APIService.addDoctorToPatient(
-        user.id,
-        selectedDoctor
+        const isDoctorAlreadyAdded = user.doctors.some(
+        (doctor) => doctor.id === selectedDoctor.id
       );
-      console.log(response);
-      setState((prevState) => ({
-        ...prevState,
-        newDoctor: "",
-      }));
-      window.location.reload();
+  
+      if (!isDoctorAlreadyAdded) {
+        try {
+          const response = await APIService.addDoctorToPatient(
+            user.id,
+            selectedDoctor
+          );
+          console.log(response);
+          setState((prevState) => ({
+            ...prevState,
+            newDoctor: "",
+          }));
+          window.location.reload();
+        } catch (error) {
+          console.error("Error adding doctor to patient:", error);
+        }
+      } else {
+        console.log("Doctor is already added to the patient's list.");
+      }
     }
   };
+  
   const updatePatient = async () => {
     console.log("hi");
     const updatedPatient = buildUpdatedPatient(user);
@@ -205,12 +217,14 @@ export default function PatientProfile() {
   const handleAddInquiry = async () => {
     const selectedDoctor = state.selectedDoctorForMessage;
     const description = state.description;
+    console.log(doctorsList);
     if (selectedDoctor && description) {
       const selectedDoctor = doctorsList.find(
         (doctor) =>
           `${doctor.firstName} ${doctor.lastName}` ===
-          state.selectedDoctorForAppointment
+          state.selectedDoctorForMessage
       );
+      console.log(state.selectedDoctorForMessage);
       try {
         const response = await APIService.addInquiryToPatient(
           user,

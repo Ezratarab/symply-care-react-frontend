@@ -108,13 +108,14 @@ class APIService {
     const headers = {
       "Content-Type": "application/json",
     };
+    console.log(doctor,patient,description);
     try {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patient.id}/addInquiry`,
         {
-          doctor: { doctor },
-          patient: { patient },
-          symptoms: { description },
+          doctor: doctor,
+          patient: patient,
+          symptoms: description,
         },
         { headers }
       );
@@ -136,9 +137,9 @@ class APIService {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patient.id}/addAppointment`,
         {
-          doctor: { doctor },
-          patient: { patient },
-          date: { date },
+          doctor: doctor ,
+          patient: patient ,
+          date: date ,
         },
         { headers }
       );
@@ -202,7 +203,7 @@ class APIService {
     };
     if (userType === "Doctor") {
       return axios
-        .post(`${SIGNUP_DOCTOR_URL}`, { newUser }, { headers })
+        .post(`${SIGNUP_DOCTOR_URL}`,  newUser , { headers })
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles
