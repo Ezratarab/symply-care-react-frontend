@@ -73,7 +73,7 @@ class APIService {
     try {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patientID}/addDoctor`,
-        doctor ,
+        doctor,
         { headers }
       );
       if (response && response.data) {
@@ -93,7 +93,7 @@ class APIService {
     try {
       const response = await axios.post(
         `${BASE_DOCTORS_URL}doctor/${doctorID}/addPatient`,
-         patient,
+        patient,
         { headers }
       );
       if (response && response.data) {
@@ -108,7 +108,7 @@ class APIService {
     const headers = {
       "Content-Type": "application/json",
     };
-    console.log(doctor,patient,description);
+    console.log(doctor, patient, description);
     try {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patient.id}/addInquiry`,
@@ -127,6 +127,52 @@ class APIService {
       throw error;
     }
   }
+  async addInquiryFromDoctorToPatient(doctor, patient, description) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    console.log(doctor, patient, description);
+    try {
+      const response = await axios.post(
+        `${BASE_DOCTORS_URL}doctor/${doctor.id}/addInquiryToPatient`,
+        {
+          doctor: doctor,
+          patient: patient,
+          symptoms: description,
+        },
+        { headers }
+      );
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error adding Inquiry From doctor to patient:", error);
+      throw error;
+    }
+  }
+  async addInquiryFromDoctorToDoctor(doctor, doctor2, description) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    console.log(doctor, doctor2, description);
+    try {
+      const response = await axios.post(
+        `${BASE_DOCTORS_URL}doctor/${doctor.id}/addInquiryToDoctor`,
+        {
+          doctor: doctor,
+          doctor2: doctor2,
+          symptoms: description,
+        },
+        { headers }
+      );
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error adding Inquiry From doctor to doctor:", error);
+      throw error;
+    }
+  }
 
   async addAppointmentToPatient(patient, doctor, date) {
     console.log("came to here to!!!!!!!!");
@@ -137,9 +183,9 @@ class APIService {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patient.id}/addAppointment`,
         {
-          doctor: doctor ,
-          patient: patient ,
-          date: date ,
+          doctor: doctor,
+          patient: patient,
+          date: date,
         },
         { headers }
       );
@@ -204,7 +250,7 @@ class APIService {
     };
     if (userType === "Doctor") {
       return axios
-        .post(`${SIGNUP_DOCTOR_URL}`,  newUser , { headers })
+        .post(`${SIGNUP_DOCTOR_URL}`, newUser, { headers })
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles
@@ -223,7 +269,7 @@ class APIService {
     } else if (userType === "Patient") {
       console.log("its patient");
       return axios
-        .post(`${SIGNUP_PATIENT_URL}`, newUser , { headers })
+        .post(`${SIGNUP_PATIENT_URL}`, newUser, { headers })
         .then((response) => {
           if (response.data.accessToken) {
             // Decode the token to get user details and roles

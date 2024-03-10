@@ -100,32 +100,64 @@ export default function DoctorProfile() {
       [`${fieldName}Error`]: "",
     }));
   };
-  const handleSelectChange = (event) => {
-    state["newPatient"] = event.target.value;
-  };
 
-  const handleDoctorMessage = () => {};
-  const handlePatientMessage = async () => {
+  const handleDoctorMessage = async () => {
     const selectedDoctor = state.selectedDoctorForMessage;
-    const description = state.description;
+    const description = state.doctorText;
+    console.log(doctorsList);
+    console.log(state.selectedDoctorForMessage);
     if (selectedDoctor && description) {
       const selectedDoctor = doctorsList.find(
         (doctor) =>
           `${doctor.firstName} ${doctor.lastName}` ===
-          state.selectedDoctorForAppointment
+          state.selectedDoctorForMessage
       );
       try {
-        const response = await APIService.addInquiryToPatient(
+        const response = await APIService.addInquiryFromDoctorToDoctor(
           user,
           selectedDoctor,
           description
         );
-        console.log("Inquiry added successfully:", response);
+        console.log(
+          "Inquiry added successfully from doctor to doctor:",
+          response
+        );
+        window.location.reload();
       } catch (error) {
-        console.error("Error adding inquiry:", error);
+        console.error("Error adding inquiry from doctor to doctor:", error);
       }
     } else {
       console.error("Please select a doctor and provide a description.");
+    }
+  };
+  const handlePatientMessage = async () => {
+    const selectedPatient = state.selectedPatientForMessage;
+    const description = state.patientText;
+    console.log(patientsList);
+    console.log(state.selectedPatientForMessage);
+    if (selectedPatient && description) {
+      const selectedPatient = patientsList.find(
+        (patient) =>
+          `${patient.firstName} ${patient.lastName}` ===
+          state.selectedPatientForMessage
+      );
+      console.log("--------", selectedPatient);
+      try {
+        const response = await APIService.addInquiryFromDoctorToPatient(
+          user,
+          selectedPatient,
+          description
+        );
+        console.log(
+          "Inquiry added successfully from doctor to patient:",
+          response
+        );
+        window.location.reload();
+      } catch (error) {
+        console.error("Error adding inquiry from doctor to patient:", error);
+      }
+    } else {
+      console.error("Please select a patient and provide a description.");
     }
   };
 
@@ -141,18 +173,35 @@ export default function DoctorProfile() {
     }
   };
 
-  const handleAddPatient = () => {
+  const handleAddPatient = async () => {
     if (state.newPatient !== "") {
-      const selectedPatient = user.patients.find(
+      const selectedPatient = patientsList.find(
         (patient) =>
           `${patient.firstName} ${patient.lastName}` === state.newPatient
       );
+      console.log(selectedPatient.id);
+      const isPatientAlreadyAdded = user.patients.some(
+        (patient) => patient.id === selectedPatient.id
+      );
 
-      // Reset the newDoctor state after adding the doctor
-      setState((prevState) => ({
-        ...prevState,
-        newPatient: "", // Reset newDoctor to empty string
-      }));
+      if (!isPatientAlreadyAdded) {
+        try {
+          const response = await APIService.addPatientToDoctor(
+            user.id,
+            selectedPatient
+          );
+          console.log(response);
+          setState((prevState) => ({
+            ...prevState,
+            newPatient: "",
+          }));
+          window.location.reload();
+        } catch (error) {
+          console.error("Error adding patient to doctor:", error);
+        }
+      } else {
+        console.log("Patient is already added to the doctors's list.");
+      }
     }
   };
 
@@ -194,6 +243,7 @@ export default function DoctorProfile() {
             const user = response.data;
             setUser(user);
             setInitialUserState(user);
+            console.log(user);
             setState({
               id: user.id || "",
               firstName: user.firstName || "",
@@ -527,7 +577,7 @@ export default function DoctorProfile() {
       </div>
       <div className={styles.description}>
         <div>
-          <p>You can send to the doctor you want something</p>
+          <p>You can send something to the doctor you want:</p>
           <select
             className={`form-select ${styles.input} ${
               state.selectedDoctorForMessageError ? styles.invalid : ""
@@ -542,19 +592,20 @@ export default function DoctorProfile() {
             <option value="">Select an option</option>
             {user &&
               doctorsList &&
-              doctorsList.map((doctor) => (
-                <option
-                  key={doctor.id}
-                  value={`${doctor.firstName} ${doctor.lastName}`}
-                >
-                  To: {doctor.firstName} {doctor.lastName}
-                </option>
-              ))}
+              doctorsList
+                .filter((doctor) => doctor.id !== user.id) 
+                .map((doctor) => (
+                  <option
+                    key={doctor.id}
+                    value={`${doctor.firstName} ${doctor.lastName}`}
+                  >
+                    To: {doctor.firstName} {doctor.lastName}
+                  </option>
+                ))}
           </select>
-
           {renderFormField("doctorText", "Describe...", "text")}
           <button type="button" onClick={handleDoctorMessage}>
-            send
+            Send
           </button>
         </div>
         <div>
@@ -684,7 +735,7 @@ export default function DoctorProfile() {
             id="floatingNewPatient"
             name="newPatient"
             value={state["newPatient"]}
-            onChange={handleSelectChange}
+            onChange={(event) => handleInputChange(event, "newPatient")}
           >
             <option value="">Select a Patient</option>
             {user &&

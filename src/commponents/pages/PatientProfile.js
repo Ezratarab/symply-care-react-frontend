@@ -585,7 +585,9 @@ export default function PatientProfile() {
             id="floatingNewDoctor"
             name="newDoctor"
             value={state["newDoctor"]}
-            onChange={handleSelectChange}
+            onChange={(event) =>
+              handleInputChange(event, "newDoctor")
+            }
           >
             <option value="">Select a Doctor</option>
             {user &&
