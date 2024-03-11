@@ -68,7 +68,7 @@ const SignUp = () => {
       imageData: null,
       specialization: state.specialization,
       hospital: state.hospital,
-      HMO: state.HMO,
+      hmo: state.HMO,
       experience: state.experience,
       inquiriesList: [],
       patients: [],
@@ -162,8 +162,8 @@ const SignUp = () => {
           await authServiceInstance.signup(buildNewDoctor(state), state.userType);
         }
         console.log("SignUp successful");
-        navigate("/login");
         window.location.reload();
+        navigate("/login");
         alert("Signup successful");
       } catch (error) {
         console.error("SignUp error:", error);

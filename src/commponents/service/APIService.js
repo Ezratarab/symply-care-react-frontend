@@ -258,7 +258,6 @@ class APIService {
         .catch((error) => {
           console.error("Error:", error);
           alert("Sign up didn't succeed");
-          return Promise.reject(error); // Reject the promise
         });
     } else if (userType === "Patient") {
       console.log("it's patient");
@@ -270,11 +269,9 @@ class APIService {
         .catch((error) => {
           console.error("Error:", error);
           alert("Sign up didn't succeed");
-          return Promise.reject(error); // Reject the promise
         });
     }
   }
-  
   
 
   // helper method, Get refresh token from local storage
@@ -308,5 +305,6 @@ class APIService {
     });
   }
 }
+
 const authServiceInstance = new APIService(); // Create an instance of AuthServiceAxios
 export default authServiceInstance; // Export the instance as the default export

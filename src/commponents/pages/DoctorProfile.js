@@ -3,7 +3,7 @@ import styles from "./PatientProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
-import defaultImage from"../assets/user.png"
+import defaultImage from "../assets/user.png";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
@@ -368,17 +368,27 @@ export default function DoctorProfile() {
           <div className={styles.profile}>
             <div className={styles.image}>
               {user && user.imageData ? (
-                <img
-                  src={`data:image/jpeg;base64,${user.imageData}`}
-                  alt="User"
-                  className={styles.profileImage}
-                />
+                <>
+                  <img
+                    src={`data:image/jpeg;base64,${user.imageData}`}
+                    alt="User"
+                    className={styles.profileImage}
+                  />
+                  <div className={styles.overlay}>
+                    <span className={styles.overlay_text}>Change Image</span>
+                  </div>
+                </>
               ) : (
-                <img
-                  src={defaultImage}
-                  alt="Default User"
-                  className={styles.profileImage}
-                />
+                <>
+                  <img
+                    src={defaultImage}
+                    alt="Default User"
+                    className={styles.profileImage}
+                  />
+                  <div className={styles.overlay}>
+                    <span className={styles.overlay_text}>Change Image</span>
+                  </div>
+                </>
               )}
             </div>
 
@@ -543,12 +553,12 @@ export default function DoctorProfile() {
                   state.HMOError ? styles.invalid : ""
                 }`}
                 name="HMO"
-                placeholder={user.HMO}
+                placeholder={user.hmo}
                 value={state.HMO}
                 onChange={(event) => handleInputChange(event, "HMO")}
               />
             ) : (
-              <span>{user?.HMO ?? ""}</span>
+              <span>{user?.hmo ?? ""}</span>
             )}
           </p>
           <p>
