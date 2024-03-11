@@ -150,7 +150,6 @@ const SignUp = () => {
   }
 
   const submit = async (event) => {
-    const response = null;
     console.log(state);
     event.preventDefault();
     if (validate()) {
@@ -158,29 +157,21 @@ const SignUp = () => {
         console.warn(state);
         setState(defaultState);
         if (state.userType === "Patient") {
-          response = await authServiceInstance.signup(
-            buildNewPatient(state),
-            state.userType
-          );
+          await authServiceInstance.signup(buildNewPatient(state), state.userType);
         } else if (state.userType === "Doctor") {
-          response = await authServiceInstance.signup(
-            buildNewDoctor(state),
-            state.userType
-          );
+          await authServiceInstance.signup(buildNewDoctor(state), state.userType);
         }
         console.log("SignUp successful");
-        console.log(response);
-        console.log("Response data:", response.data);
-        navigate("/home");
+        navigate("/login");
         window.location.reload();
-        console.log("Signup successful");
-        handleLoginLogout();
+        alert("Signup successful");
       } catch (error) {
         console.error("SignUp error:", error);
         navigate("/signup");
       }
     }
   };
+  
 
   const renderFormField = (fieldName, placeholder, type = "text") => (
     <div className={`form-floating mb-3 ${styles.formFloating}`}>

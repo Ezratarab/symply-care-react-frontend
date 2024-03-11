@@ -248,45 +248,34 @@ class APIService {
     const headers = {
       "Content-Type": "application/json",
     };
+  
     if (userType === "Doctor") {
       return axios
         .post(`${SIGNUP_DOCTOR_URL}`, newUser, { headers })
         .then((response) => {
-          if (response.data.accessToken) {
-            // Decode the token to get user details and roles
-            const decodedToken = jwtDecode(response.data.accessToken);
-            const user = {
-              accessToken: response.data.accessToken,
-              refreshToken: response.data.refreshToken,
-              roles: decodedToken.roles,
-            };
-
-            // Save the user object to local storage
-            localStorage.setItem("user", JSON.stringify(user));
-          }
-          return response.data;
+          console.log("success", response);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Sign up didn't succeed");
+          return Promise.reject(error); // Reject the promise
         });
     } else if (userType === "Patient") {
-      console.log("its patient");
+      console.log("it's patient");
       return axios
         .post(`${SIGNUP_PATIENT_URL}`, newUser, { headers })
         .then((response) => {
-          if (response.data.accessToken) {
-            // Decode the token to get user details and roles
-            const decodedToken = jwtDecode(response.data.accessToken);
-            const user = {
-              accessToken: response.data.accessToken,
-              refreshToken: response.data.refreshToken,
-              roles: decodedToken.roles,
-            };
-
-            // Save the user object to local storage
-            localStorage.setItem("user", JSON.stringify(user));
-          }
-          return response.data;
+          console.log("success", response);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Sign up didn't succeed");
+          return Promise.reject(error); // Reject the promise
         });
     }
   }
+  
+  
 
   // helper method, Get refresh token from local storage
   getRefreshToken() {

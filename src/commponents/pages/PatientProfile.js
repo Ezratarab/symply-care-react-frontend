@@ -6,6 +6,7 @@ import authServicehelpers from "../service/AuthServiceHelpers";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
+import defaultImage from"../assets/user.png";
 
 export default function PatientProfile() {
   const { isLogin } = useContext(UserContext);
@@ -305,11 +306,17 @@ export default function PatientProfile() {
       <div className={styles.right}>
         <div className={styles.title}>
           <div className={styles.profile}>
-            <div className={styles.image}>
-              {user && user.imageData && (
+          <div className={styles.image}>
+              {user && user.imageData ? (
                 <img
                   src={`data:image/jpeg;base64,${user.imageData}`}
                   alt="User"
+                  className={styles.profileImage}
+                />
+              ) : (
+                <img
+                  src={defaultImage}
+                  alt="Default User"
                   className={styles.profileImage}
                 />
               )}

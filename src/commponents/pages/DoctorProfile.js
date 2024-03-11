@@ -3,7 +3,7 @@ import styles from "./PatientProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
-
+import defaultImage from"../assets/user.png"
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
@@ -367,14 +367,21 @@ export default function DoctorProfile() {
         <div className={styles.title}>
           <div className={styles.profile}>
             <div className={styles.image}>
-              {user && user.imageData && (
+              {user && user.imageData ? (
                 <img
                   src={`data:image/jpeg;base64,${user.imageData}`}
                   alt="User"
                   className={styles.profileImage}
                 />
+              ) : (
+                <img
+                  src={defaultImage}
+                  alt="Default User"
+                  className={styles.profileImage}
+                />
               )}
             </div>
+
             <div className={styles.name}>
               {user?.firstName ?? ""} {user?.lastName ?? ""}
             </div>
@@ -593,7 +600,7 @@ export default function DoctorProfile() {
             {user &&
               doctorsList &&
               doctorsList
-                .filter((doctor) => doctor.id !== user.id) 
+                .filter((doctor) => doctor.id !== user.id)
                 .map((doctor) => (
                   <option
                     key={doctor.id}
@@ -647,20 +654,18 @@ export default function DoctorProfile() {
               {inquiry.hasAnswered ? <p>{`${inquiry.id}`}</p> : null}
             </div>
           ))}
-          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
-            <p>No answered inquiries yet</p>
-          )}
           <div>Here are your unanswered inquiries</div>
           {user?.inquiriesList?.map((inquiry, index) => (
             <div key={index} className={styles.inquiry}>
               {!inquiry.hasAnswered ? <p>{`${inquiry.id} `}</p> : null}
             </div>
           ))}
-          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
+          {user?.inquiriesList?.some(
+            (inquiry) => !inquiry.hasAnswered
+          ) ? null : (
             <p>No unanswered inquiries yet</p>
           )}
         </div>
-
         <div className={styles.appointments}>
           <div>Here's your Scheduled appointments</div>
           {user?.appointments?.map((appointment, index) => (
