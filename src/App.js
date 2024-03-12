@@ -23,7 +23,7 @@ function App() {
         <UserProvider>
           <NavBar />
           <Routes>
-            <Route path="/doctors/doctors" element={<Doctors />} />
+            <Route path="/ourDoctors" element={<Doctors />} />
             <Route path="/patients/patients" element={<PatientList />} />
             <Route
               path="/patients/deletePatient/:id"

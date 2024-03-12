@@ -7,6 +7,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
 import defaultImage from"../assets/user.png";
+import AuthWrapper from "../service/AuthWrapper";
 
 export default function PatientProfile() {
   const { isLogin } = useContext(UserContext);
@@ -261,7 +262,7 @@ export default function PatientProfile() {
           date
         );
         console.log("Patient appointment added successfully:", response);
-        setUser(response.data);
+        window.location.reload();
       } catch (error) {
         console.error("Error adding patient appointment:", error);
       }
@@ -303,6 +304,7 @@ export default function PatientProfile() {
 
   return (
     <div className={styles.main}>
+      <AuthWrapper>
       <div className={styles.right}>
         <div className={styles.title}>
           <div className={styles.profile}>
@@ -502,7 +504,7 @@ export default function PatientProfile() {
               ) : null}
             </div>
           ))}
-          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
+          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
             <p>No answered inquiries yet</p>
           )}
           <div>Here are your unanswered inquiries</div>
@@ -513,7 +515,7 @@ export default function PatientProfile() {
               ) : null}
             </div>
           ))}
-          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
+          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
             <p>No unanswered inquiries yet</p>
           )}
         </div>
@@ -612,6 +614,7 @@ export default function PatientProfile() {
           <button onClick={handleAddDoctor}>Add Doctor</button>
         </div>
       </div>
+      </AuthWrapper>
     </div>
   );
 }

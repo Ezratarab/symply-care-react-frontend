@@ -4,9 +4,8 @@ import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
 import defaultImage from "../assets/user.png";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
+import AuthWrapper from "../service/AuthWrapper";
 
 export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
@@ -16,7 +15,6 @@ export default function DoctorProfile() {
     useState(false);
   const [doctorsList, setDoctorsList] = useState([]);
   const [patientsList, setPatientsList] = useState([]);
-  const [initialUserState, setInitialUserState] = useState(null);
   const [userType, setUserType] = useState("");
 
   const defaultState = {
@@ -56,11 +54,11 @@ export default function DoctorProfile() {
     patientsTextError: "",
     hospitalError: "",
     specializationError: "",
-    HMOError: "",
+    hmoError: "",
     experienceError: "",
     specialization: "",
     hospital: "",
-    HMO: "",
+    hmo: "",
     experience: "",
   };
 
@@ -78,7 +76,7 @@ export default function DoctorProfile() {
       imageData: state.imageData,
       specialization: state.specialization,
       hospital: state.hospital,
-      HMO: state.HMO,
+      hmo: state.hmo,
       experience: state.experience,
       inquiriesList: user.inquiriesList,
       patients: user.patients,
@@ -91,9 +89,8 @@ export default function DoctorProfile() {
   const [state, setState] = useState(defaultState);
 
   const handleInputChange = (event, fieldName) => {
-    console.log(userType);
     const { value } = event.target;
-    console.log(value);
+    console.log(fieldName, ":  ",value);
     setState((prevState) => ({
       ...prevState,
       [fieldName]: value,
@@ -163,6 +160,7 @@ export default function DoctorProfile() {
 
   const updateDoctor = async () => {
     const updateDoctor = buildUpdatedDoctor(user);
+    console.log(updateDoctor);
     try {
       const response = await APIService.updateDoctorDetails(updateDoctor);
       console.log("Doctor details updated successfully:", response);
@@ -242,7 +240,6 @@ export default function DoctorProfile() {
           if (response && userStorage.roles[0] === "DOCTOR") {
             const user = response.data;
             setUser(user);
-            setInitialUserState(user);
             console.log(user);
             setState({
               id: user.id || "",
@@ -255,7 +252,7 @@ export default function DoctorProfile() {
               birthDay: user.birthDay || "",
               specialization: user.specialization || "",
               hospital: user.hospital || "",
-              HMO: user.HMO || "",
+              hmo: user.hmo || "",
               experience: user.experience || "",
               ...defaultState,
             });
@@ -321,7 +318,7 @@ export default function DoctorProfile() {
           date
         );
         console.log("Doctor appointment added successfully:", response);
-        setUser(response.data);
+        window.location.reload();
       } catch (error) {
         console.error("Error adding patient appointment:", error);
       }
@@ -363,6 +360,7 @@ export default function DoctorProfile() {
 
   return (
     <div className={styles.main}>
+      <AuthWrapper>
       <div className={styles.right}>
         <div className={styles.title}>
           <div className={styles.profile}>
@@ -550,12 +548,12 @@ export default function DoctorProfile() {
               <input
                 type="text"
                 className={`form-control ${styles.input} ${
-                  state.HMOError ? styles.invalid : ""
+                  state.hmoError ? styles.invalid : ""
                 }`}
-                name="HMO"
+                name="hmo"
                 placeholder={user.hmo}
-                value={state.HMO}
-                onChange={(event) => handleInputChange(event, "HMO")}
+                value={state.hmo}
+                onChange={(event) => handleInputChange(event, "hmo")}
               />
             ) : (
               <span>{user?.hmo ?? ""}</span>
@@ -581,9 +579,7 @@ export default function DoctorProfile() {
           <button
             onClick={() => {
               if (editMode) {
-                if (!isEqual(initialUserState, state)) {
-                  updateDoctor();
-                }
+                updateDoctor();
               }
               setEditMode((prevEditMode) => !prevEditMode);
             }}
@@ -664,15 +660,16 @@ export default function DoctorProfile() {
               {inquiry.hasAnswered ? <p>{`${inquiry.id}`}</p> : null}
             </div>
           ))}
+          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
+            <p>No answered inquiries yet</p>
+          )}
           <div>Here are your unanswered inquiries</div>
           {user?.inquiriesList?.map((inquiry, index) => (
             <div key={index} className={styles.inquiry}>
               {!inquiry.hasAnswered ? <p>{`${inquiry.id} `}</p> : null}
             </div>
           ))}
-          {user?.inquiriesList?.some(
-            (inquiry) => !inquiry.hasAnswered
-          ) ? null : (
+          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
             <p>No unanswered inquiries yet</p>
           )}
         </div>
@@ -768,6 +765,7 @@ export default function DoctorProfile() {
           <button onClick={handleAddPatient}>Add Patient</button>
         </div>
       </div>
+      </AuthWrapper>
     </div>
   );
 }

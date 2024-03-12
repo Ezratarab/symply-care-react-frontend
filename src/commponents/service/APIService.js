@@ -46,7 +46,7 @@ class APIService {
     const headers = {
       "Content-Type": "application/json",
     };
-    console.log("came to here with: ", { user });
+    console.log("came to here with: ",  user );
     try {
       const response = await axios.put(
         `${UPDATE_PATIENT_URL}${user.id}`,
@@ -61,6 +61,28 @@ class APIService {
       }
     } catch (error) {
       console.error("Error updating patient details:", error);
+      throw error;
+    }
+  }
+  async updateDoctorDetails(user) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    console.log("came to here with: ",  user );
+    try {
+      const response = await axios.put(
+        `${UPDATE_DOCTOR_URL}${user.id}`,
+        user,
+        { headers }
+      );
+
+      if (response && response.data) {
+        return response.data;
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error updating doctor details:", error);
       throw error;
     }
   }
@@ -229,7 +251,6 @@ class APIService {
       .post(`${API_URL}/login`, { email, password })
       .then((response) => {
         if (response.data.accessToken) {
-          // Decode the token to get user details and roles
           const decodedToken = jwtDecode(response.data.accessToken);
           const user = {
             accessToken: response.data.accessToken,
@@ -237,7 +258,6 @@ class APIService {
             roles: decodedToken.roles,
           };
 
-          // Save the user object to local storage
           localStorage.setItem("user", JSON.stringify(user));
         }
         return response.data;
