@@ -6,7 +6,7 @@ import authServicehelpers from "../service/AuthServiceHelpers";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
-import defaultImage from"../assets/user.png";
+import defaultImage from "../assets/user.png";
 import AuthWrapper from "../service/AuthWrapper";
 
 export default function PatientProfile() {
@@ -96,10 +96,10 @@ export default function PatientProfile() {
       const selectedDoctor = doctorsList.find(
         (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
-        const isDoctorAlreadyAdded = user.doctors.some(
+      const isDoctorAlreadyAdded = user.doctors.some(
         (doctor) => doctor.id === selectedDoctor.id
       );
-  
+
       if (!isDoctorAlreadyAdded) {
         try {
           const response = await APIService.addDoctorToPatient(
@@ -120,7 +120,7 @@ export default function PatientProfile() {
       }
     }
   };
-  
+
   const updatePatient = async () => {
     console.log("hi");
     const updatedPatient = buildUpdatedPatient(user);
@@ -221,7 +221,7 @@ export default function PatientProfile() {
     const description = state.description;
     console.log(doctorsList);
     if (selectedDoctor && description) {
-      const selectedDoctor = doctorsList.find(
+      const foundDoctor = doctorsList.find(
         (doctor) =>
           `${doctor.firstName} ${doctor.lastName}` ===
           state.selectedDoctorForMessage
@@ -230,7 +230,7 @@ export default function PatientProfile() {
       try {
         const response = await APIService.addInquiryToPatient(
           user,
-          selectedDoctor,
+          foundDoctor, // Use the foundDoctor variable here
           description
         );
         console.log("Inquiry added successfully:", response);
@@ -305,315 +305,352 @@ export default function PatientProfile() {
   return (
     <div className={styles.main}>
       <AuthWrapper>
-      <div className={styles.right}>
-        <div className={styles.title}>
-          <div className={styles.profile}>
-          <div className={styles.image}>
-              {user && user.imageData ? (
-                <img
-                  src={`data:image/jpeg;base64,${user.imageData}`}
-                  alt="User"
-                  className={styles.profileImage}
+        <div className={styles.right}>
+          <div className={styles.title}>
+            <div className={styles.profile}>
+              <div className={styles.image}>
+                {user && user.imageData ? (
+                  <img
+                    src={`data:image/jpeg;base64,${user.imageData}`}
+                    alt="User"
+                    className={styles.profileImage}
+                  />
+                ) : (
+                  <img
+                    src={defaultImage}
+                    alt="Default User"
+                    className={styles.profileImage}
+                  />
+                )}
+              </div>
+              <div className={styles.name}>
+                {user?.firstName ?? ""} {user?.lastName ?? ""}
+              </div>
+            </div>
+            <h1>We hope you are feeling well.</h1>
+          </div>
+          <div className={styles.information}>
+            <p>
+              <span className={styles.label}>ID:</span>{" "}
+              <span>{user?.id ?? ""}</span>
+            </p>
+            <p>
+              <span className={styles.label}>First Name:</span>{" "}
+              {editMode ? (
+                <input
+                  type="text"
+                  className={`form-control ${styles.input} ${
+                    state.firstNameError ? styles.invalid : ""
+                  }`}
+                  name="firstName"
+                  placeholder={user.firstName}
+                  value={state.firstName}
+                  onChange={(event) => handleInputChange(event, "firstName")}
                 />
               ) : (
-                <img
-                  src={defaultImage}
-                  alt="Default User"
-                  className={styles.profileImage}
+                <span>{user?.firstName ?? ""}</span>
+              )}
+            </p>
+            <p>
+              <span className={styles.label}>Last Name:</span>{" "}
+              {editMode ? (
+                <input
+                  type="text"
+                  className={`form-control ${styles.input} ${
+                    state.lastNameError ? styles.invalid : ""
+                  }`}
+                  name="lastName"
+                  placeholder={user.lastName}
+                  value={state.lastName}
+                  onChange={(event) => handleInputChange(event, "lastName")}
                 />
+              ) : (
+                <span>{user?.lastName ?? ""}</span>
               )}
-            </div>
-            <div className={styles.name}>
-              {user?.firstName ?? ""} {user?.lastName ?? ""}
-            </div>
-          </div>
-          <h1>We hope you are feeling well.</h1>
-        </div>
-        <div className={styles.information}>
-          <p>
-            <span className={styles.label}>ID:</span>{" "}
-            <span>{user?.id ?? ""}</span>
-          </p>
-          <p>
-            <span className={styles.label}>First Name:</span>{" "}
-            {editMode ? (
-              <input
-                type="text"
-                className={`form-control ${styles.input} ${
-                  state.firstNameError ? styles.invalid : ""
-                }`}
-                name="firstName"
-                placeholder={user.firstName}
-                value={state.firstName}
-                onChange={(event) => handleInputChange(event, "firstName")}
-              />
-            ) : (
-              <span>{user?.firstName ?? ""}</span>
-            )}
-          </p>
-          <p>
-            <span className={styles.label}>Last Name:</span>{" "}
-            {editMode ? (
-              <input
-                type="text"
-                className={`form-control ${styles.input} ${
-                  state.lastNameError ? styles.invalid : ""
-                }`}
-                name="lastName"
-                placeholder={user.lastName}
-                value={state.lastName}
-                onChange={(event) => handleInputChange(event, "lastName")}
-              />
-            ) : (
-              <span>{user?.lastName ?? ""}</span>
-            )}
-          </p>
-          <p>
-            <span className={styles.label}>email: </span>{" "}
-            <span>{user?.email ?? ""}</span>
-          </p>
-          <p>
-            <span className={styles.label}>City:</span>{" "}
-            {editMode ? (
-              <input
-                type="text"
-                className={`form-control ${styles.input} ${
-                  state.cityError ? styles.invalid : ""
-                }`}
-                name="city"
-                placeholder={user.city}
-                value={state.city}
-                onChange={(event) => handleInputChange(event, "city")}
-              />
-            ) : (
-              <span>{user?.city ?? ""}</span>
-            )}
-          </p>
-          <p>
-            <span className={styles.label}>Country:</span>{" "}
-            {editMode ? (
-              <input
-                type="text"
-                className={`form-control ${styles.input} ${
-                  state.countryError ? styles.invalid : ""
-                }`}
-                name="country"
-                placeholder={user.country}
-                value={state.country}
-                onChange={(event) => handleInputChange(event, "country")}
-              />
-            ) : (
-              <span>{user?.country ?? ""}</span>
-            )}
-          </p>
-          <p>
-            <span className={styles.label}>Street:</span>{" "}
-            {editMode ? (
-              <input
-                type="text"
-                className={`form-control ${styles.input} ${
-                  state.streetError ? styles.invalid : ""
-                }`}
-                id={`floatingStreet`}
-                name="street"
-                placeholder={user.street}
-                value={state.street}
-                onChange={(event) => handleInputChange(event, "street")}
-              />
-            ) : (
-              <span>{user?.street ?? ""}</span>
-            )}
-          </p>
-          <p>
-            <span className={styles.label}>Birth Date:</span>{" "}
-            {editMode ? (
-              <input
-                type="date"
-                className={`form-control ${styles.input} ${
-                  state.birthDayError ? styles.invalid : ""
-                }`}
-                name="birthDay"
-                placeholder={user.birthDay}
-                value={state.birthDay}
-                onChange={(event) => handleInputChange(event, "birthDay")}
-              />
-            ) : (
-              <span>{user?.birthDay ?? ""}</span>
-            )}
-          </p>
-          <button
-            onClick={() => {
-              if (editMode) {
-                if (!isEqual(initialUserState, state)) {
-                  updatePatient();
-                }
-              }
-              setEditMode((prevEditMode) => !prevEditMode);
-            }}
-          >
-            {editMode ? "Save" : "Edit"}
-          </button>
-        </div>
-      </div>
-      <div className={styles.description}>
-        <div>
-          <p>
-            You can send to the doctor you want the decription of your disease
-          </p>
-          <p>please choose a doctor and explain your symptoms:</p>
-          <select
-            className={`form-select ${styles.input} ${
-              state.selectedDoctorForMessageError ? styles.invalid : ""
-            }`}
-            id="floatingSelectedDoctorForMessage"
-            name="selectedDoctorForMessage"
-            value={state.selectedDoctorForMessage}
-            onChange={(event) =>
-              handleInputChange(event, "selectedDoctorForMessage")
-            }
-          >
-            <option value="">Select an option</option>
-            {user &&
-              user.doctors &&
-              user.doctors.map((doctor) => (
-                <option
-                  key={doctor.id}
-                  value={`${doctor.firstName} ${doctor.lastName}`}
-                >
-                  To: {doctor.firstName} {doctor.lastName}
-                </option>
-              ))}
-          </select>
-
-          {renderFormField(
-            "description",
-            "Describe what you're feeling",
-            "text"
-          )}
-
-          <button type="button" onClick={handleAddInquiry}>
-            send
-          </button>
-        </div>
-        <div className={styles.inquiries}>
-          <div>Here are your answered inquiries</div>
-          {user?.inquiriesList?.map((inquiry, index) => (
-            <div key={index} className={styles.inquiry}>
-              {inquiry.hasAnswered ? (
-                <p>{`${inquiry.id}`}</p>
-              ) : null}
-            </div>
-          ))}
-          {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
-            <p>No answered inquiries yet</p>
-          )}
-          <div>Here are your unanswered inquiries</div>
-          {user?.inquiriesList?.map((inquiry, index) => (
-            <div key={index} className={styles.inquiry}>
-              {!inquiry.hasAnswered ? (
-                <p>{`${inquiry.id} `}</p>
-              ) : null}
-            </div>
-          ))}
-          {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
-            <p>No unanswered inquiries yet</p>
-          )}
-        </div>
-
-        <div className={styles.appointments}>
-          <div>Here's your Scheduled appointments</div>
-          {user?.appointments?.map((appointment, index) => (
-            <div key={index} className={styles.appointment}>
-              <span>{appointment.date ?? ""}</span>
-              {addDeleteAppointmentMode && (
-                <div className={styles.appointmentsButtons}>
-                  <button onClick={() => handleDeleteAppointment(index)}>
-                    Delete
-                  </button>
-                </div>
+            </p>
+            <p>
+              <span className={styles.label}>email: </span>{" "}
+              <span>{user?.email ?? ""}</span>
+            </p>
+            <p>
+              <span className={styles.label}>City:</span>{" "}
+              {editMode ? (
+                <input
+                  type="text"
+                  className={`form-control ${styles.input} ${
+                    state.cityError ? styles.invalid : ""
+                  }`}
+                  name="city"
+                  placeholder={user.city}
+                  value={state.city}
+                  onChange={(event) => handleInputChange(event, "city")}
+                />
+              ) : (
+                <span>{user?.city ?? ""}</span>
               )}
-            </div>
-          ))}
-
-          {addDeleteAppointmentMode ? (
-            <>
-              <select
-                className={`form-select ${styles.input} ${
-                  state.selectedDoctorForAppointmentError ? styles.invalid : ""
-                }`}
-                id="floatingSelectedDoctor"
-                name="selectedDoctorForAppointment"
-                value={state.selectedDoctorForAppointment}
-                onChange={(event) =>
-                  handleInputChange(event, "selectedDoctorForAppointment")
+            </p>
+            <p>
+              <span className={styles.label}>Country:</span>{" "}
+              {editMode ? (
+                <input
+                  type="text"
+                  className={`form-control ${styles.input} ${
+                    state.countryError ? styles.invalid : ""
+                  }`}
+                  name="country"
+                  placeholder={user.country}
+                  value={state.country}
+                  onChange={(event) => handleInputChange(event, "country")}
+                />
+              ) : (
+                <span>{user?.country ?? ""}</span>
+              )}
+            </p>
+            <p>
+              <span className={styles.label}>Street:</span>{" "}
+              {editMode ? (
+                <input
+                  type="text"
+                  className={`form-control ${styles.input} ${
+                    state.streetError ? styles.invalid : ""
+                  }`}
+                  id={`floatingStreet`}
+                  name="street"
+                  placeholder={user.street}
+                  value={state.street}
+                  onChange={(event) => handleInputChange(event, "street")}
+                />
+              ) : (
+                <span>{user?.street ?? ""}</span>
+              )}
+            </p>
+            <p>
+              <span className={styles.label}>Birth Date:</span>{" "}
+              {editMode ? (
+                <input
+                  type="date"
+                  className={`form-control ${styles.input} ${
+                    state.birthDayError ? styles.invalid : ""
+                  }`}
+                  name="birthDay"
+                  placeholder={user.birthDay}
+                  value={state.birthDay}
+                  onChange={(event) => handleInputChange(event, "birthDay")}
+                />
+              ) : (
+                <span>{user?.birthDay ?? ""}</span>
+              )}
+            </p>
+            <button
+              onClick={() => {
+                if (editMode) {
+                  if (!isEqual(initialUserState, state)) {
+                    updatePatient();
+                  }
                 }
-              >
-                <option value="">Select an option</option>
-                {user &&
-                  user.doctors &&
-                  user.doctors.map((doctor) => (
-                    <option
-                      key={doctor.id}
-                      value={`${doctor.firstName} ${doctor.lastName}`}
-                    >
-                      With: {doctor.firstName} {doctor.lastName}
-                    </option>
-                  ))}
-              </select>
-              <form className={styles.newAppointment}>
-                {renderFormField(
-                  "newAppointmentDate",
-                  "Appointment Date",
-                  "Date"
-                )}
-                {renderFormField(
-                  "newAppointmentTime",
-                  "Appointment Time",
-                  "Time"
-                )}
-                <button type="button" onClick={handleAddDeleteAppointment}>
-                  Add
-                </button>
-                <button onClick={() => setAddDeleteAppointmentMode(false)}>
-                  Done
-                </button>
-              </form>
-            </>
-          ) : (
-            <button onClick={() => setAddDeleteAppointmentMode(true)}>
-              Add / Delete Appointment
+                setEditMode((prevEditMode) => !prevEditMode);
+              }}
+            >
+              {editMode ? "Save" : "Edit"}
             </button>
-          )}
+          </div>
         </div>
-        <div className={styles.addDoctors}>
-          <p>If you want To add Doctors, please select Doctor:</p>
-          <select
-            className={`form-select ${styles.input} ${
-              state.userTypeError ? styles.invalid : ""
-            }`}
-            id="floatingNewDoctor"
-            name="newDoctor"
-            value={state["newDoctor"]}
-            onChange={(event) =>
-              handleInputChange(event, "newDoctor")
-            }
-          >
-            <option value="">Select a Doctor</option>
-            {user &&
-              doctorsList &&
-              doctorsList.map((doctor) => (
-                <option
-                  key={doctor.id}
-                  value={`${doctor.firstName} ${doctor.lastName}`}
-                >
-                  {doctor.firstName} {doctor.lastName}
-                </option>
-              ))}
-          </select>
+        <div className={styles.description}>
+          <div>
+            <p>
+              You can send to the doctor you want the decription of your disease
+            </p>
+            <p>please choose a doctor and explain your symptoms:</p>
+            <select
+              className={`form-select ${styles.input} ${
+                state.selectedDoctorForMessageError ? styles.invalid : ""
+              }`}
+              id="floatingSelectedDoctorForMessage"
+              name="selectedDoctorForMessage"
+              value={state.selectedDoctorForMessage}
+              onChange={(event) =>
+                handleInputChange(event, "selectedDoctorForMessage")
+              }
+            >
+              <option value="">Select an option</option>
+              {user &&
+                user.doctors &&
+                user.doctors.map((doctor) => (
+                  <option
+                    key={doctor.id}
+                    value={`${doctor.firstName} ${doctor.lastName}`}
+                  >
+                    To: {doctor.firstName} {doctor.lastName}
+                  </option>
+                ))}
+            </select>
 
-          <button onClick={handleAddDoctor}>Add Doctor</button>
+            {renderFormField(
+              "description",
+              "Describe what you're feeling",
+              "text"
+            )}
+
+            <button type="button" onClick={handleAddInquiry}>
+              send
+            </button>
+          </div>
+          <div className={styles.inquiries}>
+            <div>Here are your answered inquiries</div>
+            {user?.inquiriesList?.map((inquiry, index) => {
+              const doctor = inquiry.hasAnswered
+                ? doctorsList.find((doc) =>
+                    doc.inquiriesList.some(
+                      (doctorInquiry) => doctorInquiry.id === inquiry.id
+                    )
+                  )
+                : null;
+              return (
+                <div key={index} className={styles.inquiry}>
+                  {inquiry.hasAnswered ? <span>{`${inquiry.id}`}</span> : null}
+                  <span>
+                    {doctor
+                      ? `-   with Dr. ${doctor.firstName} ${doctor.lastName}`
+                      : ""}
+                  </span>
+                </div>
+              );
+            })}
+            {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
+              <p>No answered inquiries yet</p>
+            )}
+            <div>Here are your unanswered inquiries</div>
+            {user?.inquiriesList?.map((inquiry, index) => {
+              const doctor = !inquiry.hasAnswered
+                ? doctorsList.find((doc) =>
+                    doc.inquiriesList.some(
+                      (doctorInquiry) => doctorInquiry.id === inquiry.id
+                    )
+                  )
+                : null;
+              return (
+                <div key={index} className={styles.inquiry}>
+                  {!inquiry.hasAnswered ? <span>{`${inquiry.id}`}</span> : null}
+                  <span>
+                    {doctor
+                      ? `-   with Dr. ${doctor.firstName} ${doctor.lastName}`
+                      : ""}
+                  </span>
+                </div>
+              );
+            })}
+            {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
+              <p>No unanswered inquiries yet</p>
+            )}
+          </div>
+
+          <div className={styles.appointments}>
+            <div>Here's your Scheduled appointments</div>
+            {user?.appointments?.map((appointment, index) => {
+              const doctor = doctorsList.find((doc) => {
+                const doctorAppointments = doc.appointments || [];
+                return doctorAppointments.some(
+                  (doctorAppointment) => doctorAppointment.id === appointment.id
+                );
+              });
+              return (
+                <div key={index} className={styles.appointment}>
+                  <span>{appointment.date ?? ""}</span>
+                  <span>
+                    {doctor
+                      ? `-   with Dr. ${doctor.firstName} ${doctor.lastName}`
+                      : " --none"}
+                  </span>
+                  {addDeleteAppointmentMode && (
+                    <div className={styles.appointmentsButtons}>
+                      <button onClick={() => handleDeleteAppointment(index)}>
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {addDeleteAppointmentMode ? (
+              <>
+                <select
+                  className={`form-select ${styles.input} ${
+                    state.selectedDoctorForAppointmentError
+                      ? styles.invalid
+                      : ""
+                  }`}
+                  id="floatingSelectedDoctor"
+                  name="selectedDoctorForAppointment"
+                  value={state.selectedDoctorForAppointment}
+                  onChange={(event) =>
+                    handleInputChange(event, "selectedDoctorForAppointment")
+                  }
+                >
+                  <option value="">Select an option</option>
+                  {user &&
+                    user.doctors &&
+                    user.doctors.map((doctor) => (
+                      <option
+                        key={doctor.id}
+                        value={`${doctor.firstName} ${doctor.lastName}`}
+                      >
+                        With: {doctor.firstName} {doctor.lastName}
+                      </option>
+                    ))}
+                </select>
+                <form className={styles.newAppointment}>
+                  {renderFormField(
+                    "newAppointmentDate",
+                    "Appointment Date",
+                    "Date"
+                  )}
+                  {renderFormField(
+                    "newAppointmentTime",
+                    "Appointment Time",
+                    "Time"
+                  )}
+                  <button type="button" onClick={handleAddDeleteAppointment}>
+                    Add
+                  </button>
+                  <button onClick={() => setAddDeleteAppointmentMode(false)}>
+                    Done
+                  </button>
+                </form>
+              </>
+            ) : (
+              <button onClick={() => setAddDeleteAppointmentMode(true)}>
+                Add / Delete Appointment
+              </button>
+            )}
+          </div>
+          <div className={styles.addDoctors}>
+            <p>If you want To add Doctors, please select Doctor:</p>
+            <select
+              className={`form-select ${styles.input} ${
+                state.userTypeError ? styles.invalid : ""
+              }`}
+              id="floatingNewDoctor"
+              name="newDoctor"
+              value={state["newDoctor"]}
+              onChange={(event) => handleInputChange(event, "newDoctor")}
+            >
+              <option value="">Select a Doctor</option>
+              {user &&
+                doctorsList &&
+                doctorsList.map((doctor) => (
+                  <option
+                    key={doctor.id}
+                    value={`${doctor.firstName} ${doctor.lastName}`}
+                  >
+                    {doctor.firstName} {doctor.lastName}
+                  </option>
+                ))}
+            </select>
+
+            <button onClick={handleAddDoctor}>Add Doctor</button>
+          </div>
         </div>
-      </div>
       </AuthWrapper>
     </div>
   );
