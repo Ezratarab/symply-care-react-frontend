@@ -64,6 +64,74 @@ class APIService {
       throw error;
     }
   }
+  async deletePatientAppointment(id) {
+    console.log("came to here with: ",  id );
+    try {
+      const response = await axios.delete(
+        `${BASE_PATIENTS_URL}deleteAppointment/${id}`
+      );
+
+      if (response && response.data) {
+        return response.data;
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error deleting patient appointment:", error);
+      throw error;
+    }
+  }
+  async uploadImageForDoctor(user,formData) {
+    console.log("came to here with: ",  user.id );
+    try {
+      const response = await axios.put(
+        `${BASE_DOCTORS_URL}doctor/${user.id}/addImage`,formData
+      );
+
+      if (response && response.data) {
+        return response.data; 
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error uploading doctor image:", error);
+      throw error; 
+    }
+  }
+  async uploadImageForPatient(user,formData) {
+    console.log("came to here with: ",  user.id );
+    try {
+      const response = await axios.put(
+        `${BASE_PATIENTS_URL}patient/${user.id}/addImage`,formData
+      );
+
+      if (response && response.data) {
+        return response.data; 
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error uploading doctor image:", error);
+      throw error; 
+    }
+  }
+  async deleteDoctorAppointment(id) {
+    console.log("came to here with: ",  id );
+    try {
+      const response = await axios.delete(
+        `${BASE_DOCTORS_URL}deleteAppointment/${id}`
+      );
+
+      if (response && response.data) {
+        return response.data;
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error deleting patient appointment:", error);
+      throw error;
+    }
+  }
   async updateDoctorDetails(user) {
     const headers = {
       "Content-Type": "application/json",

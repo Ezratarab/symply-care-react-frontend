@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import styles from "./PatientProfile.module.css";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import styles from "./DoctorProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
 import authServicehelpers from "../service/AuthServiceHelpers";
@@ -219,6 +219,22 @@ export default function DoctorProfile() {
 
     return true;
   };
+  const fileInputRef = useRef(null);
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        const response = await APIService.uploadImageForDoctor(user, formData);
+        console.log("Image uploaded successfully:", response);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  };
 
   useEffect(() => {
     async function getUser() {
@@ -288,15 +304,14 @@ export default function DoctorProfile() {
     getUser();
   }, [isLogin]);
 
-  const handleDeleteAppointment = (index) => {
-    setUser((prevUser) => {
-      const updatedAppointments = [...prevUser.appointments];
-      updatedAppointments.splice(index, 1); // Remove the appointment at the specified index
-      return {
-        ...prevUser,
-        appointments: updatedAppointments,
-      };
-    });
+  const handleDeleteAppointment = async (appointmentID) => {
+    try {
+      const response = await APIService.deleteDoctorAppointment(appointmentID);
+      console.log("Doctor appointment deleted successfully:", response);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting doctor appointment:", error);
+    }
   };
 
   const handleAddDeleteAppointment = async (event) => {
@@ -365,35 +380,39 @@ export default function DoctorProfile() {
           <div className={styles.title}>
             <div className={styles.profile}>
               <div className={styles.image}>
-                {user && user.imageData ? (
-                  <>
-                    <img
-                      src={`data:image/jpeg;base64,${user.imageData}`}
-                      alt="User"
-                      className={styles.profileImage}
-                    />
-                    <div className={styles.overlay}>
-                      <span className={styles.overlay_text}>Change Image</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src={defaultImage}
-                      alt="Default User"
-                      className={styles.profileImage}
-                    />
-                    <div className={styles.overlay}>
-                      <span className={styles.overlay_text}>Change Image</span>
-                    </div>
-                  </>
-                )}
+                <img
+                  src={
+                    user && user.imageData
+                      ? `data:image/jpeg;base64,${user.imageData}`
+                      : defaultImage
+                  }
+                  alt="User"
+                  className={styles.profileImage}
+                />
               </div>
-
               <div className={styles.name}>
                 {user?.firstName ?? ""} {user?.lastName ?? ""}
               </div>
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageChange}
+              ref={fileInputRef}
+            />
+
+            <button
+              onClick={() => fileInputRef.current.click()} // Click the hidden input element when the button is clicked
+              style={{
+                width: "150px",
+                marginLeft: "20px",
+                marginTop: "-30px",
+                marginBottom: "20px",
+              }}
+            >
+              Change Image
+            </button>
             <h1>Have a good work!</h1>
           </div>
           <div className={styles.information}>
@@ -660,7 +679,7 @@ export default function DoctorProfile() {
             {user?.inquiriesList?.map((inquiry, index) => {
               const patient = inquiry.hasAnswered
                 ? patientsList.find((patient) =>
-                patient.inquiriesList.some(
+                    patient.inquiriesList.some(
                       (patientInquiry) => patientInquiry.id === inquiry.id
                     )
                   )
@@ -683,8 +702,16 @@ export default function DoctorProfile() {
             {user?.inquiriesList?.map((inquiry, index) => {
               const patient = !inquiry.hasAnswered
                 ? patientsList.find((patient) =>
-                patient.inquiriesList.some(
+                    patient.inquiriesList.some(
                       (patientInquiry) => patientInquiry.id === inquiry.id
+                    )
+                  )
+                : null;
+              const doctor = !inquiry.hasAnswered
+                ? doctorsList.find((doctor) =>
+                    doctor.inquiriesList.some(
+                      (doctorInquiry) =>
+                        doctorInquiry.id === inquiry.id && doctor.id !== user.id
                     )
                   )
                 : null;
@@ -696,6 +723,16 @@ export default function DoctorProfile() {
                       ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
                       : ""}
                   </span>
+                  <span>
+                    {doctor
+                      ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
+                      : ""}
+                  </span>
+                  <div className={styles.inquiriesButtons}>
+                    {!inquiry.hasAnswered && (
+                      <button style={{ marginLeft: "20px" }}>Answer</button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -703,14 +740,14 @@ export default function DoctorProfile() {
               <p>No unanswered inquiries yet</p>
             )}
           </div>
-
           <div className={styles.appointments}>
             <div>Here's your Scheduled appointments</div>
             {user?.appointments?.map((appointment, index) => {
               const patient = patientsList.find((patient) => {
                 const patientAppointments = patient.appointments || [];
                 return patientAppointments.some(
-                  (patientAppointment) => patientAppointment.id === appointment.id
+                  (patientAppointment) =>
+                    patientAppointment.id === appointment.id
                 );
               });
               return (
@@ -723,7 +760,9 @@ export default function DoctorProfile() {
                   </span>
                   {addDeleteAppointmentMode && (
                     <div className={styles.appointmentsButtons}>
-                      <button onClick={() => handleDeleteAppointment(index)}>
+                      <button
+                        onClick={() => handleDeleteAppointment(appointment.id)}
+                      >
                         Delete
                       </button>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./PatientProfile.module.css";
 import { UserContext } from "../Context";
 import authServiceInstance from "../service/APIService";
@@ -75,19 +75,14 @@ export default function PatientProfile() {
   const [state, setState] = useState(defaultState);
 
   const handleInputChange = (event, fieldName) => {
-    console.log(userType);
     const { value } = event.target;
     console.log(value);
+    console.log(user);
+    console.log(state);
     setState((prevState) => ({
       ...prevState,
       [fieldName]: value,
       [`${fieldName}Error`]: "",
-    }));
-  };
-  const handleSelectChange = (event) => {
-    setState((prevState) => ({
-      ...prevState,
-      newDoctor: event.target.value,
     }));
   };
 
@@ -124,14 +119,6 @@ export default function PatientProfile() {
   const updatePatient = async () => {
     console.log("hi");
     const updatedPatient = buildUpdatedPatient(user);
-    try {
-      const response = await APIService.updatePatientDetails(updatedPatient);
-      console.log("Patient details updated successfully:", response);
-      setUser(response.data);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating patient details:", error);
-    }
   };
   const isEqual = (obj1, obj2) => {
     const keys1 = Object.keys(obj1);
@@ -149,7 +136,22 @@ export default function PatientProfile() {
 
     return true;
   };
+  const fileInputRef = useRef(null);
 
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        const response = await APIService.uploadImageForPatient(user, formData);
+        console.log("Image uploaded successfully:", response);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  };
   useEffect(() => {
     async function getUser() {
       if (isLogin) {
@@ -172,17 +174,19 @@ export default function PatientProfile() {
             setUser(user);
             setInitialUserState(user);
             console.log(user);
-            setState({
-              id: user.id || "",
-              firstName: user.firstName || "",
-              lastName: user.lastName || "",
-              email: user.email || "",
-              city: user.city || "",
-              country: user.country || "",
-              street: user.street || "",
-              birthDate: user.birthDay || "",
+            setState((prevState) => ({
+              ...prevState,
+              id: user.id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              city: user.city,
+              country: user.country,
+              street: user.street,
+              birthDay: user.birthDay,
               ...defaultState,
-            });
+            }));
+            console.log(state);
           } else {
             console.error("No response received for user data");
           }
@@ -194,6 +198,7 @@ export default function PatientProfile() {
         setState(defaultState);
       }
     }
+
     async function fetchDoctors() {
       try {
         const response = await APIService.getAllDoctors();
@@ -202,19 +207,19 @@ export default function PatientProfile() {
         console.error("Error fetching doctors:", error);
       }
     }
+
     fetchDoctors();
     getUser();
   }, [isLogin]);
 
-  const handleDeleteAppointment = (index) => {
-    setUser((prevUser) => {
-      const updatedAppointments = [...prevUser.appointments];
-      updatedAppointments.splice(index, 1);
-      return {
-        ...prevUser,
-        appointments: updatedAppointments,
-      };
-    });
+  const handleDeleteAppointment = async (appointmentID) => {
+    try {
+      const response = await APIService.deleteDoctorAppointment(appointmentID);
+      console.log("Patient appointment deleted successfully:", response);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting patient appointment:", error);
+    }
   };
   const handleAddInquiry = async () => {
     const selectedDoctor = state.selectedDoctorForMessage;
@@ -327,6 +332,25 @@ export default function PatientProfile() {
                 {user?.firstName ?? ""} {user?.lastName ?? ""}
               </div>
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageChange}
+              ref={fileInputRef}
+            />
+
+            <button
+              onClick={() => fileInputRef.current.click()} // Click the hidden input element when the button is clicked
+              style={{
+                width: "150px",
+                marginLeft: "20px",
+                marginTop: "-30px",
+                marginBottom: "20px",
+              }}
+            >
+              Change Image
+            </button>
             <h1>We hope you are feeling well.</h1>
           </div>
           <div className={styles.information}>
@@ -563,7 +587,9 @@ export default function PatientProfile() {
                   </span>
                   {addDeleteAppointmentMode && (
                     <div className={styles.appointmentsButtons}>
-                      <button onClick={() => handleDeleteAppointment(index)}>
+                      <button
+                        onClick={() => handleDeleteAppointment(appointment.id)}
+                      >
                         Delete
                       </button>
                     </div>

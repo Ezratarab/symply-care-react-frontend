@@ -77,7 +77,7 @@ export default function NavBar() {
             )}
           </li>
           <li>
-            <Link to="/doctors/doctors">Our Doctors</Link>
+            <Link to="/ourDoctors">Our Doctors</Link>
           </li>
           <li>
             <Link to="/about">About Us</Link>

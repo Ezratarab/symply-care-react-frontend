@@ -145,8 +145,7 @@ const SignUp = () => {
   };
 
   function handleLoginLogout() {
-    // Assuming isLogin is a boolean indicating whether the user is logged in or not
-    setIsLogin(!isLogin); // Toggle the login state
+    setIsLogin(!isLogin); 
   }
 
   const submit = async (event) => {
