@@ -6,6 +6,7 @@ import authServicehelpers from "../service/AuthServiceHelpers";
 import defaultImage from "../assets/user.png";
 import APIService from "../service/APIService";
 import AuthWrapper from "../service/AuthWrapper";
+import Inquiry from "../Inquiry";
 
 export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
@@ -16,6 +17,7 @@ export default function DoctorProfile() {
   const [doctorsList, setDoctorsList] = useState([]);
   const [patientsList, setPatientsList] = useState([]);
   const [userType, setUserType] = useState("");
+  const [selectedTab, setSelectedTab] = useState("");
 
   const defaultState = {
     id: "",
@@ -610,245 +612,278 @@ export default function DoctorProfile() {
           </div>
         </div>
         <div className={styles.description}>
-          <div>
-            <p>You can send something to the doctor you want:</p>
-            <select
-              className={`form-select ${styles.input} ${
-                state.selectedDoctorForMessageError ? styles.invalid : ""
-              }`}
-              id="floatingSelectedDoctorForMessage"
-              name="selectedDoctorForMessage"
-              value={state.selectedDoctorForMessage}
-              onChange={(event) =>
-                handleInputChange(event, "selectedDoctorForMessage")
-              }
-            >
-              <option value="">Select an option</option>
-              {user &&
-                doctorsList &&
-                doctorsList
-                  .filter((doctor) => doctor.id !== user.id)
-                  .map((doctor) => (
-                    <option
-                      key={doctor.id}
-                      value={`${doctor.firstName} ${doctor.lastName}`}
-                    >
-                      To: {doctor.firstName} {doctor.lastName}
-                    </option>
-                  ))}
-            </select>
-            {renderFormField("doctorText", "Describe...", "text")}
-            <button type="button" onClick={handleDoctorMessage}>
-              Send
+          <div className={styles.miniNavbar}>
+            <button onClick={() => setSelectedTab("messageToDoctor")}>
+              Message to doctor
+            </button>
+            <button onClick={() => setSelectedTab("messageToPatient")}>
+              Message to patient
+            </button>
+            <button onClick={() => setSelectedTab("inquiries")}>
+              Inquiries
+            </button>
+            <button onClick={() => setSelectedTab("scheduleAppointment")}>
+              Schedule Appointment
+            </button>
+            <button onClick={() => setSelectedTab("addPatient")}>
+              Add Patient
             </button>
           </div>
-          <div>
-            <p>You can send to your patients you want a message</p>
-            <p>please choose a patient and describe your message:</p>
-            <select
-              className={`form-select ${styles.input} ${
-                state.selectedPatientForMessage ? styles.invalid : ""
-              }`}
-              id="floatingSelectedPatientForMessage"
-              name="selectedPatientForMessage"
-              value={state.selectedPatientForMessage}
-              onChange={(event) =>
-                handleInputChange(event, "selectedPatientForMessage")
-              }
-            >
-              <option value="">Select an option</option>
-              {user &&
-                user.patients &&
-                user.patients.map((patient) => (
-                  <option
-                    key={patient.id}
-                    value={`${patient.firstName} ${patient.lastName}`}
-                  >
-                    To: {patient.firstName} {patient.lastName}
-                  </option>
-                ))}
-            </select>
-
-            {renderFormField("patientText", "Describe here...", "text")}
-            <button type="button" onClick={handlePatientMessage}>
-              send
-            </button>
-          </div>
-          <div className={styles.inquiries}>
-            <div>Here are your answered inquiries</div>
-            {user?.inquiriesList?.map((inquiry, index) => {
-              const patient = inquiry.hasAnswered
-                ? patientsList.find((patient) =>
-                    patient.inquiriesList.some(
-                      (patientInquiry) => patientInquiry.id === inquiry.id
-                    )
-                  )
-                : null;
-              return (
-                <div key={index} className={styles.inquiry}>
-                  {inquiry.hasAnswered ? <span>{`${inquiry.id}`}</span> : null}
-                  <span>
-                    {patient
-                      ? `-   with Dr. ${patient.firstName} ${patient.lastName}`
-                      : ""}
-                  </span>
-                </div>
-              );
-            })}
-            {user?.inquiriesList?.every((inquiry) => !inquiry.hasAnswered) && (
-              <p>No answered inquiries yet</p>
-            )}
-            <div>Here are your unanswered inquiries</div>
-            {user?.inquiriesList?.map((inquiry, index) => {
-              const patient = !inquiry.hasAnswered
-                ? patientsList.find((patient) =>
-                    patient.inquiriesList.some(
-                      (patientInquiry) => patientInquiry.id === inquiry.id
-                    )
-                  )
-                : null;
-              const doctor = !inquiry.hasAnswered
-                ? doctorsList.find((doctor) =>
-                    doctor.inquiriesList.some(
-                      (doctorInquiry) =>
-                        doctorInquiry.id === inquiry.id && doctor.id !== user.id
-                    )
-                  )
-                : null;
-              return (
-                <div key={index} className={styles.inquiry}>
-                  {!inquiry.hasAnswered ? <span>{`${inquiry.id}`}</span> : null}
-                  <span>
-                    {patient
-                      ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
-                      : ""}
-                  </span>
-                  <span>
-                    {doctor
-                      ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
-                      : ""}
-                  </span>
-                  <div className={styles.inquiriesButtons}>
-                    {!inquiry.hasAnswered && (
-                      <button style={{ marginLeft: "20px" }}>Answer</button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
-              <p>No unanswered inquiries yet</p>
-            )}
-          </div>
-          <div className={styles.appointments}>
-            <div>Here's your Scheduled appointments</div>
-            {user?.appointments?.map((appointment, index) => {
-              const patient = patientsList.find((patient) => {
-                const patientAppointments = patient.appointments || [];
-                return patientAppointments.some(
-                  (patientAppointment) =>
-                    patientAppointment.id === appointment.id
-                );
-              });
-              return (
-                <div key={index} className={styles.appointment}>
-                  <span>{appointment.date ?? ""}</span>
-                  <span>
-                    {patient
-                      ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
-                      : " --none"}
-                  </span>
-                  {addDeleteAppointmentMode && (
-                    <div className={styles.appointmentsButtons}>
-                      <button
-                        onClick={() => handleDeleteAppointment(appointment.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {addDeleteAppointmentMode ? (
-              <>
-                <select
-                  className={`form-select ${styles.input} ${
-                    state.selectedPatientForAppointmentError
-                      ? styles.invalid
-                      : ""
-                  }`}
-                  id="floatingSelectedPatientForAppointment"
-                  name="selectedPatientForAppointment"
-                  value={state.selectedPatientForAppointment}
-                  onChange={(event) =>
-                    handleInputChange(event, "selectedPatientForAppointment")
-                  }
-                >
-                  <option value="">Select an option</option>
-                  {user &&
-                    user.patients &&
-                    user.patients.map((patient) => (
+          {selectedTab === "messageToDoctor" && (
+            <div>
+              <p>You can send something to the doctor you want:</p>
+              <select
+                className={`form-select ${styles.input} ${
+                  state.selectedDoctorForMessageError ? styles.invalid : ""
+                }`}
+                id="floatingSelectedDoctorForMessage"
+                name="selectedDoctorForMessage"
+                value={state.selectedDoctorForMessage}
+                onChange={(event) =>
+                  handleInputChange(event, "selectedDoctorForMessage")
+                }
+              >
+                <option value="">Select an option</option>
+                {user &&
+                  doctorsList &&
+                  doctorsList
+                    .filter((doctor) => doctor.id !== user.id)
+                    .map((doctor) => (
                       <option
-                        key={patient.id}
-                        value={`${patient.firstName} ${patient.lastName}`}
+                        key={doctor.id}
+                        value={`${doctor.firstName} ${doctor.lastName}`}
                       >
-                        With: {patient.firstName} {patient.lastName}
+                        To: {doctor.firstName} {doctor.lastName}
                       </option>
                     ))}
-                </select>
-                <form className={styles.newAppointment}>
-                  {renderFormField(
-                    "newAppointmentDate",
-                    "Appointment Date",
-                    "Date"
-                  )}
-                  {renderFormField(
-                    "newAppointmentTime",
-                    "Appointment Time",
-                    "Time"
-                  )}
-                  <button type="button" onClick={handleAddDeleteAppointment}>
-                    Add
-                  </button>
-                  <button onClick={() => setAddDeleteAppointmentMode(false)}>
-                    Done
-                  </button>
-                </form>
-              </>
-            ) : (
-              <button onClick={() => setAddDeleteAppointmentMode(true)}>
-                Add / Delete Appointment
+              </select>
+              {renderFormField("doctorText", "Describe...", "text")}
+              <button type="button" onClick={handleDoctorMessage}>
+                Send
               </button>
-            )}
-          </div>
-          <div className={styles.addDoctors}>
-            <p>If you want To add Patients, please select Patient:</p>
-            <select
-              className={`form-select ${styles.input} ${
-                state.newPatient ? styles.invalid : ""
-              }`}
-              id="floatingNewPatient"
-              name="newPatient"
-              value={state["newPatient"]}
-              onChange={(event) => handleInputChange(event, "newPatient")}
-            >
-              <option value="">Select a Patient</option>
-              {user &&
-                patientsList &&
-                patientsList.map((patient) => (
-                  <option
-                    key={patient.id}
-                    value={`${patient.firstName} ${patient.lastName}`}
-                  >
-                    {patient.firstName} {patient.lastName}
-                  </option>
-                ))}
-            </select>
+            </div>
+          )}
+          {selectedTab === "messageToPatient" && (
+            <div>
+              <p>You can send to your patients you want a message</p>
+              <p>please choose a patient and describe your message:</p>
+              <select
+                className={`form-select ${styles.input} ${
+                  state.selectedPatientForMessage ? styles.invalid : ""
+                }`}
+                id="floatingSelectedPatientForMessage"
+                name="selectedPatientForMessage"
+                value={state.selectedPatientForMessage}
+                onChange={(event) =>
+                  handleInputChange(event, "selectedPatientForMessage")
+                }
+              >
+                <option value="">Select an option</option>
+                {user &&
+                  user.patients &&
+                  user.patients.map((patient) => (
+                    <option
+                      key={patient.id}
+                      value={`${patient.firstName} ${patient.lastName}`}
+                    >
+                      To: {patient.firstName} {patient.lastName}
+                    </option>
+                  ))}
+              </select>
 
-            <button onClick={handleAddPatient}>Add Patient</button>
-          </div>
+              {renderFormField("patientText", "Describe here...", "text")}
+              <button type="button" onClick={handlePatientMessage}>
+                send
+              </button>
+            </div>
+          )}
+          {selectedTab === "inquiries" && (
+            <div className={styles.inquiries}>
+              <div>Here are your answered inquiries</div>
+              {user?.inquiriesList?.map((inquiry, index) => {
+                const patient = inquiry.hasAnswered
+                  ? patientsList.find((patient) =>
+                      patient.inquiriesList.some(
+                        (patientInquiry) => patientInquiry.id === inquiry.id
+                      )
+                    )
+                  : null;
+                const doctor = inquiry.hasAnswered
+                  ? doctorsList.find((doctor) =>
+                      doctor.inquiriesList.some(
+                        (doctorInquiry) =>
+                          doctorInquiry.id === inquiry.id &&
+                          doctor.id !== user.id
+                      )
+                    )
+                  : null;
+
+                return (
+                  (doctor || patient) && (
+                    <Inquiry
+                      key={index}
+                      inquiry={inquiry}
+                      patient={patient}
+                      doctor={doctor}
+                      answered={true}
+                    />
+                  )
+                );
+              })}
+              {user?.inquiriesList?.every(
+                (inquiry) => !inquiry.hasAnswered
+              ) && <p>No answered inquiries yet</p>}
+              <div>Here are your unanswered inquiries</div>
+              {user?.inquiriesList?.map((inquiry, index) => {
+                const patient = !inquiry.hasAnswered
+                  ? patientsList.find((patient) =>
+                      patient.inquiriesList.some(
+                        (patientInquiry) => patientInquiry.id === inquiry.id
+                      )
+                    )
+                  : null;
+                const doctor = !inquiry.hasAnswered
+                  ? doctorsList.find((doctor) =>
+                      doctor.inquiriesList.some(
+                        (doctorInquiry) =>
+                          doctorInquiry.id === inquiry.id &&
+                          doctor.id !== user.id
+                      )
+                    )
+                  : null;
+                return (
+                  (doctor || patient) && (
+                    <Inquiry
+                      key={index}
+                      inquiry={inquiry}
+                      patient={patient}
+                      doctor={doctor}
+                      answered={false}
+                    />
+                  )
+                );
+              })}
+              {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
+                <p>No unanswered inquiries yet</p>
+              )}
+            </div>
+          )}
+
+          {selectedTab === "scheduleAppointment" && (
+            <div className={styles.appointments}>
+              <div>Here's your Scheduled appointments</div>
+              {user?.appointments?.map((appointment, index) => {
+                const patient = patientsList.find((patient) => {
+                  const patientAppointments = patient.appointments || [];
+                  return patientAppointments.some(
+                    (patientAppointment) =>
+                      patientAppointment.id === appointment.id
+                  );
+                });
+                return (
+                  <div key={index} className={styles.appointment}>
+                    <span>{appointment.date ?? ""}</span>
+                    <span>
+                      {patient
+                        ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                        : " --none"}
+                    </span>
+                    {addDeleteAppointmentMode && (
+                      <div className={styles.appointmentsButtons}>
+                        <button
+                          onClick={() =>
+                            handleDeleteAppointment(appointment.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {addDeleteAppointmentMode ? (
+                <>
+                  <select
+                    className={`form-select ${styles.input} ${
+                      state.selectedPatientForAppointmentError
+                        ? styles.invalid
+                        : ""
+                    }`}
+                    id="floatingSelectedPatientForAppointment"
+                    name="selectedPatientForAppointment"
+                    value={state.selectedPatientForAppointment}
+                    onChange={(event) =>
+                      handleInputChange(event, "selectedPatientForAppointment")
+                    }
+                  >
+                    <option value="">Select an option</option>
+                    {user &&
+                      user.patients &&
+                      user.patients.map((patient) => (
+                        <option
+                          key={patient.id}
+                          value={`${patient.firstName} ${patient.lastName}`}
+                        >
+                          With: {patient.firstName} {patient.lastName}
+                        </option>
+                      ))}
+                  </select>
+                  <form className={styles.newAppointment}>
+                    {renderFormField(
+                      "newAppointmentDate",
+                      "Appointment Date",
+                      "Date"
+                    )}
+                    {renderFormField(
+                      "newAppointmentTime",
+                      "Appointment Time",
+                      "Time"
+                    )}
+                    <button type="button" onClick={handleAddDeleteAppointment}>
+                      Add
+                    </button>
+                    <button onClick={() => setAddDeleteAppointmentMode(false)}>
+                      Done
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <button onClick={() => setAddDeleteAppointmentMode(true)}>
+                  Add / Delete Appointment
+                </button>
+              )}
+            </div>
+          )}
+          {selectedTab === "addPatient" && (
+            <div className={styles.addDoctors}>
+              <p>If you want To add Patients, please select Patient:</p>
+              <select
+                className={`form-select ${styles.input} ${
+                  state.newPatient ? styles.invalid : ""
+                }`}
+                id="floatingNewPatient"
+                name="newPatient"
+                value={state["newPatient"]}
+                onChange={(event) => handleInputChange(event, "newPatient")}
+              >
+                <option value="">Select a Patient</option>
+                {user &&
+                  patientsList &&
+                  patientsList.map((patient) => (
+                    <option
+                      key={patient.id}
+                      value={`${patient.firstName} ${patient.lastName}`}
+                    >
+                      {patient.firstName} {patient.lastName}
+                    </option>
+                  ))}
+              </select>
+
+              <button onClick={handleAddPatient}>Add Patient</button>
+            </div>
+          )}
         </div>
       </AuthWrapper>
     </div>
