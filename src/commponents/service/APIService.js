@@ -64,6 +64,44 @@ class APIService {
       throw error;
     }
   }
+  async sendAnswer(inquiryId, answer) {
+    console.log('came to here with: ', inquiryId);
+    try {
+      const response = await axios.put(
+        `${BASE_DOCTORS_URL}answerInquiry/${inquiryId}`,
+        answer,{ headers: { 'Content-Type': 'text/plain' } }
+      );
+      if (response && response.data) {
+        console.log("Response from backend:", response);
+        return response.data;
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error answering inquiry:", error);
+      throw error;
+    }
+  }
+  async getAIAnswer(inquiryId) {
+    console.log('came to here with: ', inquiryId);
+    try {
+      const response = await axios.put(
+        `${BASE_DOCTORS_URL}answerAI/${inquiryId}`
+         
+      );
+      if (response && response.data) {
+        console.log("Response from backend:", response);
+        return response.data;
+      } else {
+        throw new Error("Empty response or missing data");
+      }
+    } catch (error) {
+      console.error("Error answering inquiry:", error);
+      throw error;
+    }
+  }
+  
+  
   async deletePatientAppointment(id) {
     console.log("came to here with: ",  id );
     try {

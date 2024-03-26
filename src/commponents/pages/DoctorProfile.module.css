@@ -35,7 +35,7 @@
   border-radius: 50%; /* Make the container circular */
   margin: 2rem;
   grid-column: 1;
-  
+
   position: relative;
 }
 
@@ -117,4 +117,32 @@
 
 .addDoctors {
   margin-bottom: 70px;
+}
+.miniNavbar {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.buttonContainer {
+  border: 0.2cm solid #223673; /* Set border size and color */
+  border-radius: 1rem; /* Optional: Add border radius for a rounded border */
+  display: flex;
+  overflow: hidden; /* Ensure overflow content does not break layout */
+}
+
+.buttonContainer button {
+  background-color: transparent;
+  border: none;
+  color: #223673;
+  font-size: 16px;
+  padding: 10px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.buttonContainer button:hover,
+.buttonContainer button:focus {
+  color: white; /* Change text color on hover/focus */
 }

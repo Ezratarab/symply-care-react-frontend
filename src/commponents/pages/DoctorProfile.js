@@ -7,6 +7,8 @@ import defaultImage from "../assets/user.png";
 import APIService from "../service/APIService";
 import AuthWrapper from "../service/AuthWrapper";
 import Inquiry from "../Inquiry";
+import Popup from "reactjs-popup";
+import "reactjs-popup/dist/index.css";
 
 export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
@@ -18,6 +20,9 @@ export default function DoctorProfile() {
   const [patientsList, setPatientsList] = useState([]);
   const [userType, setUserType] = useState("");
   const [selectedTab, setSelectedTab] = useState("");
+  const [answerMode, setAnswerMode] = useState(false);
+  const [popupContent, setPopupContent] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const defaultState = {
     id: "",
@@ -33,6 +38,7 @@ export default function DoctorProfile() {
     patientText: "",
     newAppointmentDate: "",
     newAppointmentTime: "",
+    answerText: "",
     selectedDoctorForMessage: "",
     selectedPatientForMessage: "",
     selectedPatientForAppointment: "",
@@ -56,6 +62,7 @@ export default function DoctorProfile() {
     patientsTextError: "",
     hospitalError: "",
     specializationError: "",
+    answerTextError: "",
     hmoError: "",
     experienceError: "",
     specialization: "",
@@ -98,6 +105,66 @@ export default function DoctorProfile() {
       [fieldName]: value,
       [`${fieldName}Error`]: "",
     }));
+  };
+
+  const handleSendClick = async (inquiry) => {
+    const description = state.answerText; // Get the answer text from the component's state
+    const inquiryId = inquiry.id;
+
+    // Check if both inquiryId and description are valid
+    if (inquiryId && description) {
+      try {
+        // Call the sendAnswer function from the APIService
+        const response = await APIService.sendAnswer(inquiryId, description);
+
+        if (response) {
+          console.log("Inquiry has been answered successfully: ", response);
+          window.location.reload();
+        } else {
+          console.error("Empty response or missing data in the response.");
+        }
+      } catch (error) {
+        console.error("Error answering inquiry:", error);
+      }
+    } else {
+      console.error("Please provide a description.");
+    }
+  };
+
+  const handleSendToAI = async (inquiry) => {
+    console.log("Sending to AI:");
+    const inquiryId = inquiry.id;
+
+    if (inquiryId) {
+      try {
+        const response = await APIService.getAIAnswer(inquiryId);
+        if (response) {
+          console.log(
+            "Inquiry has been answered successfully by AI: ",
+            response
+          );
+          const matchingRow = response.matching_row;
+          const formattedContent = (
+            <div>
+              <button onClick={() => setIsOpen(false)}>X</button>{" "}
+              {/* Close button */}
+              <p>Disease 1: {matchingRow["Disease 1"]}</p>
+              <p>Disease 2: {matchingRow["Disease 2"]}</p>
+              <p>Disease 3: {matchingRow["Disease 3"]}</p>
+              <p>Support: {matchingRow["Support"]}</p>
+            </div>
+          );
+          setPopupContent(formattedContent);
+          setIsOpen(true);
+        } else {
+          console.error("Response does not contain matching data");
+        }
+      } catch (error) {
+        console.error("Error answering inquiry by AI:", error);
+      }
+    } else {
+      console.error("Please provide inquiry.");
+    }
   };
 
   const handleDoctorMessage = async () => {
@@ -613,22 +680,25 @@ export default function DoctorProfile() {
         </div>
         <div className={styles.description}>
           <div className={styles.miniNavbar}>
-            <button onClick={() => setSelectedTab("messageToDoctor")}>
-              Message to doctor
-            </button>
-            <button onClick={() => setSelectedTab("messageToPatient")}>
-              Message to patient
-            </button>
-            <button onClick={() => setSelectedTab("inquiries")}>
-              Inquiries
-            </button>
-            <button onClick={() => setSelectedTab("scheduleAppointment")}>
-              Schedule Appointment
-            </button>
-            <button onClick={() => setSelectedTab("addPatient")}>
-              Add Patient
-            </button>
+            <div className={styles.buttonContainer}>
+              <button onClick={() => setSelectedTab("messageToDoctor")}>
+                Message to doctor
+              </button>
+              <button onClick={() => setSelectedTab("messageToPatient")}>
+                Message to patient
+              </button>
+              <button onClick={() => setSelectedTab("inquiries")}>
+                Inquiries
+              </button>
+              <button onClick={() => setSelectedTab("scheduleAppointment")}>
+                Schedule Appointment
+              </button>
+              <button onClick={() => setSelectedTab("addPatient")}>
+                Add Patient
+              </button>
+            </div>
           </div>
+
           {selectedTab === "messageToDoctor" && (
             <div>
               <p>You can send something to the doctor you want:</p>
@@ -720,13 +790,25 @@ export default function DoctorProfile() {
 
                 return (
                   (doctor || patient) && (
-                    <Inquiry
-                      key={index}
-                      inquiry={inquiry}
-                      patient={patient}
-                      doctor={doctor}
-                      answered={true}
-                    />
+                    <div className={styles.inquiry} key={index}>
+                      <span>{`${inquiry.id}`}</span>
+                      <span>
+                        {patient
+                          ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                          : ""}
+                      </span>
+                      <span>
+                        {doctor
+                          ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
+                          : ""}
+                      </span>
+                      {inquiry.hasAnswered && (
+                        <>
+                          <div>message: {inquiry.symptoms}</div>
+                          <div>Answer: {inquiry.answer} </div>
+                        </>
+                      )}
+                    </div>
                   )
                 );
               })}
@@ -753,13 +835,47 @@ export default function DoctorProfile() {
                   : null;
                 return (
                   (doctor || patient) && (
-                    <Inquiry
-                      key={index}
-                      inquiry={inquiry}
-                      patient={patient}
-                      doctor={doctor}
-                      answered={false}
-                    />
+                    <div className={styles.inquiry} key={index}>
+                      <span>{`${inquiry.id}`}</span>
+                      <span>
+                        {patient
+                          ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                          : ""}
+                      </span>
+                      <span>
+                        {doctor
+                          ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
+                          : ""}
+                      </span>
+                      <p>message: {inquiry.symptoms}</p>
+                      {!inquiry.hasAnswered && inquiry.senderId !== user.id && (
+                        <div>
+                          {answerMode &&
+                            renderFormField(
+                              "answerText",
+                              "Answer here",
+                              "text"
+                            )}
+                          {answerMode ? (
+                            <>
+                              <button onClick={() => handleSendClick(inquiry)}>
+                                Send
+                              </button>
+                              <button onClick={() => handleSendToAI(inquiry)}>
+                                Send to AI
+                              </button>
+                              <Popup open={isOpen} position="right center">
+                                {popupContent}
+                              </Popup>
+                            </>
+                          ) : (
+                            <button onClick={() => setAnswerMode(true)}>
+                              Answer
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )
                 );
               })}
@@ -768,7 +884,6 @@ export default function DoctorProfile() {
               )}
             </div>
           )}
-
           {selectedTab === "scheduleAppointment" && (
             <div className={styles.appointments}>
               <div>Here's your Scheduled appointments</div>
