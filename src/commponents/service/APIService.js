@@ -6,6 +6,7 @@ const API_URL = "http://localhost:8080";
 const BASE_PATIENTS_URL = "http://localhost:8080/patients/";
 const BASE_DOCTORS_URL = "http://localhost:8080/doctors/";
 const DOCTORS_LIST_URL = "http://localhost:8080/doctors/doctors";
+const DOCTORS_LIST_URL2 = "http://localhost:8080/doctors/fullDoctors";
 const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
 const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient/";
 const GET_PATIENT_ID_URL = "http://localhost:8080/patients/patient/I";
@@ -21,39 +22,81 @@ class APIService {
   getAllDoctors() {
     return axios.get(DOCTORS_LIST_URL);
   }
+  getAllDoctorsWithInquiries() {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(DOCTORS_LIST_URL2, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 
   getAllPatients() {
-    return axios.get(PATIENTS_LIST_URL);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(PATIENTS_LIST_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
   deletePatient(id) {
-    console.log("hi");
-    return axios.delete(`${DELETE_PATIENT_URL}${id}`);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.delete(`${DELETE_PATIENT_URL}${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
+
   getPatientById(id) {
-    return axios.get(`${GET_PATIENT_ID_URL}${id}`);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(`${GET_PATIENT_ID_URL}${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
+
   getPatientByEmail(email) {
-    return axios.get(`${GET_PATIENT_EMAIL_URL}${email}`);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(`${GET_PATIENT_EMAIL_URL}${email}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
+
   getDoctorById(id) {
-    return axios.get(`${GET_DOCTOR_ID_URL}${id}`);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(`${GET_DOCTOR_ID_URL}${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
+
   getDoctorByEmail(email) {
-    return axios.get(`${GET_DOCTOR_EMAIL_URL}${email}`);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    return axios.get(`${GET_DOCTOR_EMAIL_URL}${email}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
+
   async updatePatientDetails(user) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    console.log("came to here with: ",  user );
     try {
       const response = await axios.put(
         `${UPDATE_PATIENT_URL}${user.id}`,
         user,
         { headers }
       );
-
       if (response && response.data) {
         return response.data;
       } else {
@@ -64,15 +107,21 @@ class APIService {
       throw error;
     }
   }
+
   async sendAnswer(inquiryId, answer) {
-    console.log('came to here with: ', inquiryId);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.put(
         `${BASE_DOCTORS_URL}answerInquiry/${inquiryId}`,
-        answer,{ headers: { 'Content-Type': 'text/plain' } }
+        answer,
+        {
+          headers: {
+            "Content-Type": "text/plain",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response && response.data) {
-        console.log("Response from backend:", response);
         return response.data;
       } else {
         throw new Error("Empty response or missing data");
@@ -82,15 +131,20 @@ class APIService {
       throw error;
     }
   }
+
   async getAIAnswer(inquiryId) {
-    console.log('came to here with: ', inquiryId);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.put(
-        `${BASE_DOCTORS_URL}answerAI/${inquiryId}`
-         
+        `${BASE_DOCTORS_URL}answerAI/${inquiryId}`,
+        null, // Updated: Removed empty body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response && response.data) {
-        console.log("Response from backend:", response);
         return response.data;
       } else {
         throw new Error("Empty response or missing data");
@@ -100,13 +154,17 @@ class APIService {
       throw error;
     }
   }
-  
-  
+
   async deletePatientAppointment(id) {
-    console.log("came to here with: ",  id );
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.delete(
-        `${BASE_PATIENTS_URL}deleteAppointment/${id}`
+        `${BASE_PATIENTS_URL}deleteAppointment/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response && response.data) {
@@ -119,45 +177,65 @@ class APIService {
       throw error;
     }
   }
-  async uploadImageForDoctor(user,formData) {
-    console.log("came to here with: ",  user.id );
+
+  async uploadImageForDoctor(user, formData) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.put(
-        `${BASE_DOCTORS_URL}doctor/${user.id}/addImage`,formData
+        `${BASE_DOCTORS_URL}doctor/${user.id}/addImage`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response && response.data) {
-        return response.data; 
+        return response.data;
       } else {
         throw new Error("Empty response or missing data");
       }
     } catch (error) {
       console.error("Error uploading doctor image:", error);
-      throw error; 
+      throw error;
     }
   }
-  async uploadImageForPatient(user,formData) {
-    console.log("came to here with: ",  user.id );
+
+  async uploadImageForPatient(user, formData) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.put(
-        `${BASE_PATIENTS_URL}patient/${user.id}/addImage`,formData
+        `${BASE_PATIENTS_URL}patient/${user.id}/addImage`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response && response.data) {
-        return response.data; 
+        return response.data;
       } else {
         throw new Error("Empty response or missing data");
       }
     } catch (error) {
       console.error("Error uploading doctor image:", error);
-      throw error; 
+      throw error;
     }
   }
+
   async deleteDoctorAppointment(id) {
-    console.log("came to here with: ",  id );
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
       const response = await axios.delete(
-        `${BASE_DOCTORS_URL}deleteAppointment/${id}`
+        `${BASE_DOCTORS_URL}deleteAppointment/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response && response.data) {
@@ -170,17 +248,16 @@ class APIService {
       throw error;
     }
   }
+
   async updateDoctorDetails(user) {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    console.log("came to here with: ",  user );
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     try {
-      const response = await axios.put(
-        `${UPDATE_DOCTOR_URL}${user.id}`,
-        user,
-        { headers }
-      );
+      const response = await axios.put(`${UPDATE_DOCTOR_URL}${user.id}`, user, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response && response.data) {
         return response.data;
@@ -194,9 +271,10 @@ class APIService {
   }
 
   async addDoctorToPatient(patientID, doctor) {
-    console.log(doctor);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
     try {
       const response = await axios.post(
@@ -214,9 +292,10 @@ class APIService {
   }
 
   async addPatientToDoctor(doctorID, patient) {
-    console.log(patient);
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
     try {
       const response = await axios.post(
@@ -232,11 +311,13 @@ class APIService {
       throw error;
     }
   }
+
   async addInquiryToPatient(patient, doctor, description) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    console.log(doctor, patient, description);
     try {
       const response = await axios.post(
         `${BASE_PATIENTS_URL}patient/${patient.id}/addInquiry`,
@@ -255,11 +336,13 @@ class APIService {
       throw error;
     }
   }
+
   async addInquiryFromDoctorToPatient(doctor, patient, description) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    console.log(doctor, patient, description);
     try {
       const response = await axios.post(
         `${BASE_DOCTORS_URL}doctor/${doctor.id}/addInquiryToPatient`,
@@ -278,11 +361,13 @@ class APIService {
       throw error;
     }
   }
+
   async addInquiryFromDoctorToDoctor(doctor, doctor2, description) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    console.log(doctor, doctor2, description);
     try {
       const response = await axios.post(
         `${BASE_DOCTORS_URL}doctor/${doctor.id}/addInquiryToDoctor`,
@@ -303,9 +388,10 @@ class APIService {
   }
 
   async addAppointmentToPatient(patient, doctor, date) {
-    console.log("came to here to!!!!!!!!");
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
     try {
       const response = await axios.post(
@@ -325,12 +411,13 @@ class APIService {
       throw error;
     }
   }
+
   async addAppointmentToDoctor(doctor, patient, date) {
-    console.log("came to here to!!!!!!!!");
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
     const headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    console.log(doctor, patient, date);
     try {
       const appointment = {
         doctor: doctor,
@@ -364,17 +451,16 @@ class APIService {
             roles: decodedToken.roles,
           };
 
-          localStorage.setItem("user", JSON.stringify(user));
+          sessionStorage.setItem("user", JSON.stringify(user));
         }
         return response.data;
       });
   }
   signup(newUser, userType) {
-    console.log(newUser);
     const headers = {
       "Content-Type": "application/json",
     };
-  
+
     if (userType === "Doctor") {
       return axios
         .post(`${SIGNUP_DOCTOR_URL}`, newUser, { headers })
@@ -398,19 +484,18 @@ class APIService {
         });
     }
   }
-  
 
-  // helper method, Get refresh token from local storage
+  // helper method, Get refresh token from session storage
   getRefreshToken() {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     return user ? user.refreshToken : null;
   }
 
   logout() {
     return new Promise((resolve, reject) => {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(sessionStorage.getItem("user"));
       if (user && user.accessToken && user.refreshToken) {
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
         axios
           .post(`${API_URL}/logout`, null, {
             headers: {

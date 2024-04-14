@@ -9,6 +9,8 @@ import AuthWrapper from "../service/AuthWrapper";
 import Inquiry from "../Inquiry";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
+import { saveAs } from "file-saver";
+import { Document, Packer, Paragraph, TextRun } from "docx";
 
 export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
@@ -74,25 +76,25 @@ export default function DoctorProfile() {
   const buildUpdatedDoctor = (user) => {
     const newUser = {
       id: user.id,
-      firstName: state.firstName,
-      lastName: state.lastName,
+      firstName: state.firstName || user.firstName,
+      lastName: state.lastName || user.lastName,
       email: user.email,
       password: user.password,
-      city: state.city,
-      country: state.country,
-      street: state.street,
-      birthDay: state.birthDay,
-      imageData: state.imageData,
-      specialization: state.specialization,
-      hospital: state.hospital,
-      hmo: state.hmo,
-      experience: state.experience,
+      city: state.city || user.city,
+      country: state.country || user.country,
+      street: state.street || user.street,
+      birthDay: state.birthDay || user.birthDay,
+      imageData: state.imageData || user.imageData,
+      specialization: state.specialization || user.specialization,
+      hospital: state.hospital || user.hospital,
+      hmo: state.hmo || user.hmo,
+      experience: state.experience || user.experience,
       inquiriesList: user.inquiriesList,
       patients: user.patients,
       appointments: user.appointments,
     };
-    console.log(newUser);
-    return newUser;
+
+    return newUser; // Ensure you return the newUser object
   };
 
   const [state, setState] = useState(defaultState);
@@ -108,13 +110,11 @@ export default function DoctorProfile() {
   };
 
   const handleSendClick = async (inquiry) => {
-    const description = state.answerText; // Get the answer text from the component's state
+    const description = state.answerText;
     const inquiryId = inquiry.id;
 
-    // Check if both inquiryId and description are valid
     if (inquiryId && description) {
       try {
-        // Call the sendAnswer function from the APIService
         const response = await APIService.sendAnswer(inquiryId, description);
 
         if (response) {
@@ -131,7 +131,7 @@ export default function DoctorProfile() {
     }
   };
 
-  const handleSendToAI = async (inquiry) => {
+  const handleSendToAI = async (inquiry, patient) => {
     console.log("Sending to AI:");
     const inquiryId = inquiry.id;
 
@@ -144,16 +144,72 @@ export default function DoctorProfile() {
             response
           );
           const matchingRow = response.matching_row;
+          const rowNumber = response.row_number;
+
+          let confidenceText;
+          let mainDisease = response.mainDisease;
+          let otherDiseases = [];
+
+          if (rowNumber >= 0) {
+            switch (rowNumber) {
+              case 1:
+                confidenceText = "HIGH confidence";
+                break;
+              case 2:
+                confidenceText = "MID confidence";
+                break;
+              case 3:
+                confidenceText = "LOW confidence";
+                break;
+              default:
+                confidenceText = "Unknown confidence";
+            }
+            mainDisease = matchingRow[`Disease ${rowNumber}`];
+
+            otherDiseases = Object.keys(matchingRow)
+              .filter(
+                (key) =>
+                  key.startsWith("Disease") && key !== `Disease ${rowNumber}`
+              )
+              .map((key) => matchingRow[key]);
+          }
+
+          const content = `Diagnosis Report for ${
+            patient.firstName
+          }\n\nDisease: ${mainDisease}\nConfidence: ${confidenceText}\nAI is recommending you also to check these diseases:\n- ${otherDiseases.join(
+            "\n- "
+          )}`;
+
+          const handleDownload = () => {
+            const fileName = `${patient.firstName}_${patient.lastName}_diagnosis_report.txt`;
+            const downloadContent = `Disease: ${mainDisease}\nConfidence: ${confidenceText}\n\nAI is recommending you also to check these diseases:\n${otherDiseases.join(
+              "\n"
+            )}`;
+            const blob = new Blob([downloadContent], {
+              type: "text/plain;charset=utf-8",
+            });
+            saveAs(blob, fileName);
+          };
+
           const formattedContent = (
             <div>
-              <button onClick={() => setIsOpen(false)}>X</button>{" "}
-              {/* Close button */}
-              <p>Disease 1: {matchingRow["Disease 1"]}</p>
-              <p>Disease 2: {matchingRow["Disease 2"]}</p>
-              <p>Disease 3: {matchingRow["Disease 3"]}</p>
-              <p>Support: {matchingRow["Support"]}</p>
+              <button onClick={() => setIsOpen(false)}>Close</button>{" "}
+              <p>Disease: {mainDisease}</p>
+              {rowNumber >= 0 && (
+                <>
+                  <p>Confidence: {confidenceText}</p>
+                  <p>AI is recommending you also to check these diseases:</p>
+                  <ul>
+                    {otherDiseases.map((disease, index) => (
+                      <li key={index}>{disease}</li>
+                    ))}
+                  </ul>
+                  <button onClick={handleDownload}>Download as Text</button>
+                </>
+              )}
             </div>
           );
+
           setPopupContent(formattedContent);
           setIsOpen(true);
         } else {
@@ -170,8 +226,6 @@ export default function DoctorProfile() {
   const handleDoctorMessage = async () => {
     const selectedDoctor = state.selectedDoctorForMessage;
     const description = state.doctorText;
-    console.log(doctorsList);
-    console.log(state.selectedDoctorForMessage);
     if (selectedDoctor && description) {
       const selectedDoctor = doctorsList.find(
         (doctor) =>
@@ -199,15 +253,12 @@ export default function DoctorProfile() {
   const handlePatientMessage = async () => {
     const selectedPatient = state.selectedPatientForMessage;
     const description = state.patientText;
-    console.log(patientsList);
-    console.log(state.selectedPatientForMessage);
     if (selectedPatient && description) {
       const selectedPatient = patientsList.find(
         (patient) =>
           `${patient.firstName} ${patient.lastName}` ===
           state.selectedPatientForMessage
       );
-      console.log("--------", selectedPatient);
       try {
         const response = await APIService.addInquiryFromDoctorToPatient(
           user,
@@ -229,7 +280,6 @@ export default function DoctorProfile() {
 
   const updateDoctor = async () => {
     const updateDoctor = buildUpdatedDoctor(user);
-    console.log(updateDoctor);
     try {
       const response = await APIService.updateDoctorDetails(updateDoctor);
       console.log("Doctor details updated successfully:", response);
@@ -246,7 +296,6 @@ export default function DoctorProfile() {
         (patient) =>
           `${patient.firstName} ${patient.lastName}` === state.newPatient
       );
-      console.log(selectedPatient.id);
       const isPatientAlreadyAdded = user.patients.some(
         (patient) => patient.id === selectedPatient.id
       );
@@ -257,7 +306,6 @@ export default function DoctorProfile() {
             user.id,
             selectedPatient
           );
-          console.log(response);
           setState((prevState) => ({
             ...prevState,
             newPatient: "",
@@ -272,22 +320,6 @@ export default function DoctorProfile() {
     }
   };
 
-  const isEqual = (obj1, obj2) => {
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    for (const key of keys1) {
-      if (obj1[key] !== obj2[key]) {
-        return false;
-      }
-    }
-
-    return true;
-  };
   const fileInputRef = useRef(null);
 
   const handleImageChange = async (event) => {
@@ -311,38 +343,30 @@ export default function DoctorProfile() {
         try {
           const userStorage = authServicehelpers.getCurrentUser();
           let response;
-          if (userStorage.roles[0] === "PATIENT") {
+          if (userStorage.roles[0] === "ROLE_PATIENT") {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
             setUserType("Patient");
-          } else if (userStorage.roles[0] === "DOCTOR") {
+          } else if (userStorage.roles[0] === "ROLE_DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );
             setUserType("Doctor");
           }
-          if (response && userStorage.roles[0] === "DOCTOR") {
+          if (response && userStorage.roles[0] === "ROLE_DOCTOR") {
             const user = response.data;
             setUser(user);
-            console.log(user);
-            setState({
-              id: user.id || "",
-              firstName: user.firstName || "",
-              lastName: user.lastName || "",
-              email: user.email || "",
-              city: user.city || "",
-              country: user.country || "",
-              street: user.street || "",
-              birthDay: user.birthDay || "",
-              specialization: user.specialization || "",
-              hospital: user.hospital || "",
-              hmo: user.hmo || "",
-              experience: user.experience || "",
-              ...defaultState,
-            });
+            const updatedState = Object.keys(user).reduce((acc, key) => {
+              if (user[key]) {
+                acc[key] = user[key];
+              }
+              return acc;
+            }, {});
+
+            setState(updatedState);
           } else {
-            console.error("No response received for user data");
+            console.error("Error in recieved response for user data");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -352,6 +376,7 @@ export default function DoctorProfile() {
         setState(defaultState);
       }
     }
+
     async function fetchDoctors() {
       try {
         const response = await APIService.getAllDoctors();
@@ -360,6 +385,7 @@ export default function DoctorProfile() {
         console.error("Error fetching doctors:", error);
       }
     }
+
     async function fetchPatients() {
       try {
         const response = await APIService.getAllPatients();
@@ -368,10 +394,15 @@ export default function DoctorProfile() {
         console.error("Error fetching patients:", error);
       }
     }
+
     fetchPatients();
     fetchDoctors();
     getUser();
   }, [isLogin]);
+
+  useEffect(() => {
+    console.log("Updated state:", state);
+  }, [state]);
 
   const handleDeleteAppointment = async (appointmentID) => {
     try {
@@ -384,17 +415,13 @@ export default function DoctorProfile() {
   };
 
   const handleAddDeleteAppointment = async (event) => {
-    console.log("came to here!");
-    console.log(state.selectedPatientForAppointment);
     if (state.selectedPatientForAppointment !== "") {
       const selectedPatient = patientsList.find(
         (patient) =>
           `${patient.firstName} ${patient.lastName}` ===
           state.selectedPatientForAppointment
       );
-      console.log(selectedPatient);
       const date = state.newAppointmentDate + " " + state.newAppointmentTime;
-      console.log(user, selectedPatient, date);
       try {
         const response = await APIService.addAppointmentToDoctor(
           user,
@@ -412,7 +439,6 @@ export default function DoctorProfile() {
       newAppointmentDate: "",
       newAppointmentTime: "",
     }));
-    console.log(user.appointments);
   };
 
   const renderFormField = (fieldName, placeholder, type = "text") => (
@@ -717,10 +743,10 @@ export default function DoctorProfile() {
                 {user &&
                   doctorsList &&
                   doctorsList
-                    .filter((doctor) => doctor.id !== user.id)
+                    .filter((doctor) => doctor.email !== user.email)
                     .map((doctor) => (
                       <option
-                        key={doctor.id}
+                        key={doctor.email}
                         value={`${doctor.firstName} ${doctor.lastName}`}
                       >
                         To: {doctor.firstName} {doctor.lastName}
@@ -773,21 +799,20 @@ export default function DoctorProfile() {
               {user?.inquiriesList?.map((inquiry, index) => {
                 const patient = inquiry.hasAnswered
                   ? patientsList.find((patient) =>
-                      patient.inquiriesList.some(
+                      patient.inquiriesList?.some(
                         (patientInquiry) => patientInquiry.id === inquiry.id
                       )
                     )
                   : null;
                 const doctor = inquiry.hasAnswered
                   ? doctorsList.find((doctor) =>
-                      doctor.inquiriesList.some(
+                      doctor.inquiriesList?.some(
                         (doctorInquiry) =>
                           doctorInquiry.id === inquiry.id &&
-                          doctor.id !== user.id
+                          doctor.email !== user.email
                       )
                     )
                   : null;
-
                 return (
                   (doctor || patient) && (
                     <div className={styles.inquiry} key={index}>
@@ -817,22 +842,23 @@ export default function DoctorProfile() {
               ) && <p>No answered inquiries yet</p>}
               <div>Here are your unanswered inquiries</div>
               {user?.inquiriesList?.map((inquiry, index) => {
-                const patient = !inquiry.hasAnswered
-                  ? patientsList.find((patient) =>
-                      patient.inquiriesList.some(
-                        (patientInquiry) => patientInquiry.id === inquiry.id
-                      )
+                const patient =
+                  !inquiry.hasAnswered &&
+                  patientsList?.find((patient) =>
+                    patient.inquiriesList?.some(
+                      (patientInquiry) => patientInquiry.id === inquiry.id
                     )
-                  : null;
-                const doctor = !inquiry.hasAnswered
-                  ? doctorsList.find((doctor) =>
-                      doctor.inquiriesList.some(
-                        (doctorInquiry) =>
-                          doctorInquiry.id === inquiry.id &&
-                          doctor.id !== user.id
-                      )
+                  );
+                const doctor =
+                  !inquiry.hasAnswered &&
+                  doctorsList?.find((doctor) =>
+                    doctor.inquiriesList?.some(
+                      (doctorInquiry) =>
+                        doctorInquiry.id === inquiry.id &&
+                        doctor.email !== user.email
                     )
-                  : null;
+                  );
+                console.log(user.inquiriesList);
                 return (
                   (doctor || patient) && (
                     <div className={styles.inquiry} key={index}>
@@ -861,7 +887,9 @@ export default function DoctorProfile() {
                               <button onClick={() => handleSendClick(inquiry)}>
                                 Send
                               </button>
-                              <button onClick={() => handleSendToAI(inquiry)}>
+                              <button
+                                onClick={() => handleSendToAI(inquiry, patient)}
+                              >
                                 Send to AI
                               </button>
                               <Popup open={isOpen} position="right center">

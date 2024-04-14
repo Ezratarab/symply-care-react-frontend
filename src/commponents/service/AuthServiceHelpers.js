@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 
 class AuthServiceHelpers {
     getCurrentUser() {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         if (user && user.accessToken) {
             const decodedToken = jwtDecode(user.accessToken);
             return decodedToken;
@@ -12,7 +12,6 @@ class AuthServiceHelpers {
 
     getUserRole() {
         const currentUser = this.getCurrentUser();
-        console.log(currentUser);
         console.log('Decoded JWT:', currentUser);
 
         if (currentUser && currentUser.roles && currentUser.roles.length > 0) {
@@ -27,12 +26,12 @@ class AuthServiceHelpers {
 
 
     isAuthenticated() {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         return user && user.accessToken;
     }
 
     getAccessToken() {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         return user ? user.accessToken : null;
     }
 
@@ -47,11 +46,11 @@ class AuthServiceHelpers {
     }
 
     setTokens(accessToken, refreshToken) {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         if (user) {
             user.accessToken = accessToken;
             user.refreshToken = refreshToken;
-            localStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('user', JSON.stringify(user));
         }
     }
 }

@@ -17,11 +17,11 @@ export default function NavBar() {
         try {
           const userStorage = authServicehelpers.getCurrentUser();
           let response;
-          if (userStorage.roles[0] === "PATIENT") {
+          if (userStorage.roles[0] === "ROLE_PATIENT") {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
-          } else if (userStorage.roles[0] === "DOCTOR") {
+          } else if (userStorage.roles[0] === "ROLE_DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );

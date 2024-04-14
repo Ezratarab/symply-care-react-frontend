@@ -35,7 +35,7 @@ function Doctors() {
       <div className="dt-cards-content">
         {doctors.map((doctor) => (
           <Doctor
-            key={doctor.id}
+            key={doctor.email}
             img={`data:image/jpeg;base64,${doctor.imageData}`} // Here's the corrected img attribute
             name={`Dr. ${doctor.firstName} ${doctor.lastName}`}
             title={doctor.specialization}

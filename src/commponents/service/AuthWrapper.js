@@ -20,7 +20,7 @@ const AuthWrapper = ({ children }) => {
     const checkAuthenticationAndNavigate = async () => {
       console.log("UserRole:", AuthServiceHelpers.getUserRole());
       console.log("Pathname:", location.pathname);
-      if (AuthServiceHelpers.getUserRole() === "DOCTOR") {
+      if (AuthServiceHelpers.getUserRole() === "ROLE_DOCTOR") {
         if (location.pathname.startsWith("/patients")) {
           navigate("/");
           console.log("donttttttttttttttttt");
@@ -28,7 +28,7 @@ const AuthWrapper = ({ children }) => {
           return;
         }
       }
-      if (AuthServiceHelpers.getUserRole() === "PATIENT") {
+      if (AuthServiceHelpers.getUserRole() === "ROLE_PATIENT") {
         if (location.pathname.startsWith("/doctors")) {
           navigate("/");
           console.log("donttttttttttttttttt");

@@ -19,16 +19,17 @@ export default function BubbleHome() {
           const userStorage = authServicehelpers.getCurrentUser();
           setUserRoles(userStorage.roles);
           let response; // Define response variable outside the if-else blocks
-          if (userStorage.roles[0] === "PATIENT") {
+          if (userStorage.roles[0] === "ROLE_PATIENT") {
             response = await authServiceInstance.getPatientByEmail(
               userStorage.sub
             );
-          } else if (userStorage.roles[0] === "DOCTOR") {
+          } else if (userStorage.roles[0] === "ROLE_DOCTOR") {
             response = await authServiceInstance.getDoctorByEmail(
               userStorage.sub
             );
           }
-          if (response) { // Check if response is not null before accessing data
+          if (response) {
+            // Check if response is not null before accessing data
             const user = response.data;
             setUserId(user.id);
           } else {
@@ -43,14 +44,13 @@ export default function BubbleHome() {
     }
     getUser();
   }, [isLogin]);
-  
+
   function handleClickButtons() {
     if (isLogin) {
       if (userRoles.length === 1) {
-        if (userRoles[0] === "PATIENT") {
+        if (userRoles[0] === "ROLE_PATIENT") {
           navigate(`${PATIENT_PROFILE_URL}${userId}`);
-        } else if (userRoles[0] === "DOCTOR") {
-          console.log(userId);
+        } else if (userRoles[0] === "ROLE_DOCTOR") {
           navigate(`${DOCTOR_PROFILE_URL}${userId}`);
         }
       }
@@ -62,7 +62,7 @@ export default function BubbleHome() {
   return (
     <div className={styles.buttons}>
       <button onClick={handleClickButtons}>Schedule an appointment</button>
-      <button onClick={handleClickButtons}>Change an appointment</button>
+      <button onClick={handleClickButtons}>Ask A doctor</button>
       <button onClick={handleClickButtons}>Test results</button>
       <button onClick={handleClickButtons}>Your Profile</button>
     </div>

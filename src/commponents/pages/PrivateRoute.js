@@ -13,8 +13,7 @@ import AuthServiceHelpers from "../Services/AuthServiceHelpers";
 // depending on the route being defined. For example, the element prop for the "/" route is <HomePage />.
 // that should be rendered if the user is authenticated.
 function PrivateRoute({ element }) {
-  // Call the `isAuthenticated` method from the AuthServiceHelpers module to check
-  // if the user is authenticated.
+
   const isAuthenticated = AuthServiceHelpers.isAuthenticated();
 
   if (isAuthenticated) {
