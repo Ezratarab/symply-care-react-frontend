@@ -14,7 +14,6 @@
   margin-top: 20px;
 }
 .name {
-  margin-left: 20px; /* Adjust the margin as needed */
   font-size: 20px; /* Adjust the font size as needed */
   height: 50%;
   margin-top: 60px;
@@ -72,24 +71,39 @@
   height: 100%;
   width: 70%;
 }
+.saveEditButton {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 50%;
+  height: 30px;
+  cursor: pointer;
+}
+
+.saveEditButton:hover {
+  background-color: #0056b3;
+}
+.changeImageButton {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 50%;
+  height: 30px;
+  cursor: pointer;
+}
+.changeImageButton:hover {
+  background-color: #0056b3;
+}
 
 .appointments {
   margin-top: 70px;
   width: 500px;
   margin-bottom: 70px;
 }
-.inquiries {
-  margin-top: 70px;
-  width: 500px;
-  margin-bottom: 70px;
-}
 
 .appointments > div:nth-child(1) {
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.inquiries div {
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -145,4 +159,225 @@
 .buttonContainer button:hover,
 .buttonContainer button:focus {
   color: white; /* Change text color on hover/focus */
+}
+.messageToDoctor {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.messageToDoctor p {
+  margin-bottom: 10px;
+}
+
+.messageToDoctor select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.messageToDoctor button {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.messageToDoctor button:hover {
+  background-color: #0056b3;
+}
+
+.messageToPatient {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.messageToPatient p {
+  margin-bottom: 10px;
+}
+
+.messageToPatient select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.messageToPatient button {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.messageToPatient button:hover {
+  background-color: #0056b3;
+}
+
+/* Add your custom styles for inquiries */
+.inquiries {
+  margin-top: 20px;
+}
+
+.inquiry {
+  border: 1px solid #223673;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.inquiry span {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.inquiry div {
+  margin-top: 8px;
+}
+
+.answeredTitle,
+.unansweredTitle {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #223673;
+}
+
+.noInquiries {
+  color: #223673;
+  font-style: italic;
+}
+
+.appointments {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.sectionTitle {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.appointment {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #223673;
+  border-radius: 5px;
+}
+
+.form-select {
+  height: 90px;
+  padding: 5px;
+  font-size: 14px;
+}
+
+.invalid {
+  border-color: red;
+}
+
+.newAppointmentForm {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+.deleteAppointmentButton {
+  background-color: red;
+  border: none;
+  cursor: pointer;
+}
+
+.addDeleteAppointmentButton {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+}
+.addDeleteAppointmentButton:hover {
+  background-color: #0056b3;
+}
+
+.addDoctors {
+  margin: 20px;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
+.formTitle {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #223673;
+  margin-bottom: 10px;
+}
+
+.formDescription {
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.invalid {
+  border-color: red;
+}
+
+.addAppointmentButton,
+.doneAppointmentButton {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  height: 30px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.answerInquiryButton,
+.addPatientButton {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  height: 35px;
+  width: 100px;
+  cursor: pointer;
+}
+
+.answerInquiryButton:hover,
+.addAppointmentButton:hover,
+.addPatientButton:hover {
+  background-color: #0056b3;
+}
+
+.patientDoctorName {
+  font-style: italic; /* Make the text italic */
+  color: #223673;
+}
+.sendInquiryButtons {
+  background-color: #223673;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  height: 30px;
+  width:max-content;
+  margin-right: 5px;
+  cursor: pointer;
 }

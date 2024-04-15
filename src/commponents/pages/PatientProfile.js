@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import APIService from "../service/APIService";
 import defaultImage from "../assets/user.png";
 import AuthWrapper from "../service/AuthWrapper";
+import Swal from "sweetalert2";
 
 export default function PatientProfile() {
   const { isLogin } = useContext(UserContext);
@@ -18,6 +19,7 @@ export default function PatientProfile() {
   const [doctorsList, setDoctorsList] = useState([]);
   const [userType, setUserType] = useState("");
   const [selectedTab, setSelectedTab] = useState("");
+  const Swal = require("sweetalert2");
 
   const defaultState = {
     id: "",
@@ -90,7 +92,7 @@ export default function PatientProfile() {
         (doctor) => `${doctor.firstName} ${doctor.lastName}` === state.newDoctor
       );
       const isDoctorAlreadyAdded = user.doctors.some(
-        (doctor) => doctor.id === selectedDoctor.id
+        (doctor) => doctor.email === selectedDoctor.email
       );
 
       if (!isDoctorAlreadyAdded) {
@@ -104,10 +106,22 @@ export default function PatientProfile() {
             newDoctor: "",
           }));
           window.location.reload();
+          Swal.fire({
+            title: "Success",
+            text: "The doctor has been successfully added.",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
         } catch (error) {
           console.error("Error adding doctor to patient:", error);
         }
       } else {
+        Swal.fire({
+          title: "Error",
+          text: "The selected doctor is already added!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         console.log("Doctor is already added to the patient's list.");
       }
     }
@@ -216,6 +230,12 @@ export default function PatientProfile() {
       const response = await APIService.deleteDoctorAppointment(appointmentID);
       console.log("Patient appointment deleted successfully:", response);
       window.location.reload();
+      Swal.fire({
+        title: "Success",
+        text: "The appointment has been successfully deleted.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
     } catch (error) {
       console.error("Error deleting patient appointment:", error);
     }
@@ -237,6 +257,12 @@ export default function PatientProfile() {
         );
         console.log("Inquiry added successfully:", response);
         window.location.reload();
+        Swal.fire({
+          title: "Success",
+          text: "The inquiry has been successfully sent.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       } catch (error) {
         console.error("Error adding inquiry:", error);
       }
@@ -261,6 +287,12 @@ export default function PatientProfile() {
         );
         console.log("Patient appointment added successfully:", response);
         window.location.reload();
+        Swal.fire({
+          title: "Success",
+          text: "The appointment has been successfully added.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       } catch (error) {
         console.error("Error adding patient appointment:", error);
       }
@@ -333,7 +365,23 @@ export default function PatientProfile() {
             />
 
             <button
-              onClick={() => fileInputRef.current.click()} // Click the hidden input element when the button is clicked
+              className={styles.changeImageButton}
+              onClick={() => {
+                // Display SweetAlert2 confirmation dialog
+                Swal.fire({
+                  title: "Change Image",
+                  text: "Are you sure you want to change the image profile?",
+                  icon: "question",
+                  showCancelButton: true,
+                  confirmButtonText: "Yes",
+                  cancelButtonText: "No",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Click the hidden input element when confirmed
+                    fileInputRef.current.click();
+                  }
+                });
+              }}
               style={{
                 width: "150px",
                 marginLeft: "20px",
@@ -458,11 +506,27 @@ export default function PatientProfile() {
               )}
             </p>
             <button
+              className={styles.saveEditButton}
               onClick={() => {
                 if (editMode) {
-                  updatePatient();
+                  Swal.fire({
+                    title: "Do you want to save the changes?",
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: "Save",
+                    denyButtonText: `Don't save`,
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      Swal.fire("Saved!", "", "success");
+                      updatePatient();
+                    } else if (result.isDenied) {
+                      Swal.fire("Changes are not saved", "", "info");
+                    }
+                  });
+                } else {
+                  // Toggle edit mode
+                  setEditMode((prevEditMode) => !prevEditMode);
                 }
-                setEditMode((prevEditMode) => !prevEditMode);
               }}
             >
               {editMode ? "Save" : "Edit"}
@@ -508,7 +572,10 @@ export default function PatientProfile() {
                 {user &&
                   user.doctors &&
                   user.doctors.map((doctor) => (
-                    <option key={doctor.id} value={`${doctor.id}`}>
+                    <option
+                      key={doctor.email}
+                      value={`${doctor.firstName} ${doctor.lastName}`}
+                    >
                       {`${doctor.firstName} ${doctor.lastName}`}
                     </option>
                   ))}
@@ -524,7 +591,32 @@ export default function PatientProfile() {
               <button
                 className={styles.sendButton} // Add your custom style for the send button
                 type="button"
-                onClick={handleAddInquiry}
+                onClick={() => {
+                  console.log(state.selectedDoctorForMessage);
+                  console.log(state.description);
+                  if (!state.selectedDoctorForMessage || !state.description) {
+                    // If any of the required fields is missing, display an error message
+                    Swal.fire({
+                      title: "Error",
+                      text: "Please select a doctor and provide a description.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  } else {
+                    Swal.fire({
+                      title: "Send Inquiry",
+                      text: "Are you sure you want to send this inquiry?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonText: "Send",
+                      cancelButtonText: "Cancel",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handleAddInquiry();
+                      }
+                    });
+                  }
+                }}
               >
                 Send
               </button>
@@ -635,10 +727,22 @@ export default function PatientProfile() {
                     {addDeleteAppointmentMode && (
                       <div className={styles.appointmentsButtons}>
                         <button
-                          onClick={() =>
-                            handleDeleteAppointment(appointment.id)
-                          }
-                          className={styles.deleteButton}
+                          onClick={() => {
+                            // Display SweetAlert2 confirmation dialog
+                            Swal.fire({
+                              title: "Delete Appointment",
+                              text: "Are you sure you want to delete this appointment?",
+                              icon: "warning",
+                              showCancelButton: true,
+                              confirmButtonText: "Delete",
+                              cancelButtonText: "Cancel",
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                handleDeleteAppointment(appointment.id);
+                              }
+                            });
+                          }}
+                          className={styles.deleteAppointmentButton}
                         >
                           Delete
                         </button>
@@ -647,7 +751,6 @@ export default function PatientProfile() {
                   </div>
                 );
               })}
-
               {addDeleteAppointmentMode ? (
                 <div className={`form-floating mb-3 ${styles.formFloating}`}>
                   <select
@@ -667,7 +770,10 @@ export default function PatientProfile() {
                     {user &&
                       user.doctors &&
                       user.doctors.map((doctor) => (
-                        <option key={doctor.id} value={`${doctor.id}`}>
+                        <option
+                          key={doctor.email}
+                          value={`${doctor.firstName} ${doctor.lastName}`}
+                        >
                           {`${doctor.firstName} ${doctor.lastName}`}
                         </option>
                       ))}
@@ -683,25 +789,56 @@ export default function PatientProfile() {
                       "Appointment Time",
                       "Time"
                     )}
-                    <button
-                      type="button"
-                      onClick={handleAddDeleteAppointment}
-                      className={styles.addButton}
-                    >
-                      Add
-                    </button>
-                    <button
-                      onClick={() => setAddDeleteAppointmentMode(false)}
-                      className={styles.doneButton}
-                    >
-                      Done
-                    </button>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Check if date and time are set
+                          if (
+                            !state.newAppointmentDate ||
+                            !state.newAppointmentTime ||
+                            !state.selectedDoctorForAppointment
+                          ) {
+                            // If date or time is not set, show an error alert
+                            Swal.fire({
+                              title: "Error",
+                              text: "Please select both date and time for the appointment, and Provide a doctor",
+                              icon: "error",
+                              confirmButtonText: "OK",
+                            });
+                          } else {
+                            // If both date and time are set, display SweetAlert2 confirmation dialog
+                            Swal.fire({
+                              title: "Add Appointment",
+                              text: "Are you sure you want to add this appointment?",
+                              icon: "question",
+                              showCancelButton: true,
+                              confirmButtonText: "Add",
+                              cancelButtonText: "Cancel",
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                handleAddDeleteAppointment();
+                              }
+                            });
+                          }
+                        }}
+                        className={styles.addAppointmentButton}
+                      >
+                        Add
+                      </button>
+                      <button
+                        onClick={() => setAddDeleteAppointmentMode(false)}
+                        className={styles.doneAppointmentButton}
+                      >
+                        Done
+                      </button>
+                    </div>
                   </form>
                 </div>
               ) : (
                 <button
                   onClick={() => setAddDeleteAppointmentMode(true)}
-                  className={styles.addDeleteButton}
+                  className={styles.addDeleteAppointmentButton}
                 >
                   Add / Delete Appointment
                 </button>
@@ -719,18 +856,52 @@ export default function PatientProfile() {
                 name="newDoctor"
                 value={state["newDoctor"]}
                 onChange={(event) => handleInputChange(event, "newDoctor")}
+                style={{
+                  border: state.userTypeError
+                    ? "1px solid red"
+                    : "1px solid #ccc",
+                }}
               >
                 <option value="">Select a Doctor</option>
                 {user &&
                   doctorsList &&
                   doctorsList.map((doctor) => (
-                    <option key={doctor.id} value={`${doctor.id}`}>
+                    <option
+                      key={doctor.email}
+                      value={`${doctor.firstName} ${doctor.lastName}`}
+                    >
                       {doctor.firstName} {doctor.lastName}
                     </option>
                   ))}
               </select>
-
-              <button className={styles.addButton} onClick={handleAddDoctor}>
+              <button
+                className={styles.addDoctorButton}
+                onClick={() => {
+                  if (!state.newDoctor) {
+                    // Display SweetAlert2 error message if newDoctor is empty
+                    Swal.fire({
+                      title: "Error",
+                      text: "Please provide details for the new doctor.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  } else {
+                    // Display SweetAlert2 confirmation dialog for adding the doctor
+                    Swal.fire({
+                      title: "Add Doctor",
+                      text: "Are you sure you want to add this doctor?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonText: "Add",
+                      cancelButtonText: "Cancel",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handleAddDoctor();
+                      }
+                    });
+                  }
+                }}
+              >
                 Add Doctor
               </button>
             </div>

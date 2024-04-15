@@ -11,6 +11,7 @@ import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, TextRun } from "docx";
+import Swal from "sweetalert2";
 
 export default function DoctorProfile() {
   const { isLogin } = useContext(UserContext);
@@ -25,6 +26,7 @@ export default function DoctorProfile() {
   const [answerMode, setAnswerMode] = useState(false);
   const [popupContent, setPopupContent] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const Swal = require("sweetalert2");
 
   const defaultState = {
     id: "",
@@ -180,38 +182,39 @@ export default function DoctorProfile() {
             "\n- "
           )}`;
 
-          const handleDownload = () => {
-            const fileName = `${patient.firstName}_${patient.lastName}_diagnosis_report.txt`;
-            const downloadContent = `Disease: ${mainDisease}\nConfidence: ${confidenceText}\n\nAI is recommending you also to check these diseases:\n${otherDiseases.join(
-              "\n"
-            )}`;
-            const blob = new Blob([downloadContent], {
-              type: "text/plain;charset=utf-8",
-            });
-            saveAs(blob, fileName);
-          };
-
-          const formattedContent = (
-            <div>
-              <button onClick={() => setIsOpen(false)}>Close</button>{" "}
-              <p>Disease: {mainDisease}</p>
-              {rowNumber >= 0 && (
-                <>
-                  <p>Confidence: {confidenceText}</p>
+          Swal.fire({
+            title: "Diagnosis Report",
+            html: `
+              <div>
+                <p>Disease: ${mainDisease}</p>
+                ${
+                  rowNumber >= 0
+                    ? `
+                  <p>Confidence: ${confidenceText}</p>
                   <p>AI is recommending you also to check these diseases:</p>
                   <ul>
-                    {otherDiseases.map((disease, index) => (
-                      <li key={index}>{disease}</li>
-                    ))}
+                    ${otherDiseases
+                      .map((disease) => `<li>${disease}</li>`)
+                      .join("")}
                   </ul>
-                  <button onClick={handleDownload}>Download as Text</button>
-                </>
-              )}
-            </div>
-          );
-
-          setPopupContent(formattedContent);
-          setIsOpen(true);
+                `
+                    : ""
+                }
+              </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "Download as Text",
+            cancelButtonText: "Close",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const fileName = `${patient.firstName}_${patient.lastName}_diagnosis_report.txt`;
+              const downloadContent = content;
+              const blob = new Blob([downloadContent], {
+                type: "text/plain;charset=utf-8",
+              });
+              saveAs(blob, fileName);
+            }
+          });
         } else {
           console.error("Response does not contain matching data");
         }
@@ -225,6 +228,7 @@ export default function DoctorProfile() {
 
   const handleDoctorMessage = async () => {
     const selectedDoctor = state.selectedDoctorForMessage;
+    console.log("---", selectedDoctor);
     const description = state.doctorText;
     if (selectedDoctor && description) {
       const selectedDoctor = doctorsList.find(
@@ -284,7 +288,6 @@ export default function DoctorProfile() {
       const response = await APIService.updateDoctorDetails(updateDoctor);
       console.log("Doctor details updated successfully:", response);
       setUser(response.data);
-      window.location.reload();
     } catch (error) {
       console.error("Error updating doctor details:", error);
     }
@@ -315,6 +318,12 @@ export default function DoctorProfile() {
           console.error("Error adding patient to doctor:", error);
         }
       } else {
+        Swal.fire({
+          title: "Error",
+          text: "The selected patient is already added!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         console.log("Patient is already added to the doctors's list.");
       }
     }
@@ -336,7 +345,20 @@ export default function DoctorProfile() {
       }
     }
   };
-
+  const handleChangeImageClick = () => {
+    Swal.fire({
+      title: "Change Image",
+      text: "Are you sure you want to change the image?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fileInputRef.current.click();
+      }
+    });
+  };
   useEffect(() => {
     async function getUser() {
       if (isLogin) {
@@ -379,7 +401,7 @@ export default function DoctorProfile() {
 
     async function fetchDoctors() {
       try {
-        const response = await APIService.getAllDoctors();
+        const response = await APIService.getAllDoctorsWithInquiries();
         setDoctorsList(response.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -498,7 +520,8 @@ export default function DoctorProfile() {
             />
 
             <button
-              onClick={() => fileInputRef.current.click()} // Click the hidden input element when the button is clicked
+              className={styles.changeImageButton}
+              onClick={handleChangeImageClick}
               style={{
                 width: "150px",
                 marginLeft: "20px",
@@ -693,11 +716,27 @@ export default function DoctorProfile() {
               )}
             </p>
             <button
+              className={styles.saveEditButton}
               onClick={() => {
                 if (editMode) {
-                  updateDoctor();
+                  Swal.fire({
+                    title: "Do you want to save the changes?",
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: "Save",
+                    denyButtonText: `Don't save`,
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      Swal.fire("Saved!", "", "success");
+                      updateDoctor();
+                    } else if (result.isDenied) {
+                      Swal.fire("Changes are not saved", "", "info");
+                    }
+                    window.location.reload();
+                  });
+                } else {
+                  setEditMode((prevEditMode) => !prevEditMode);
                 }
-                setEditMode((prevEditMode) => !prevEditMode);
               }}
             >
               {editMode ? "Save" : "Edit"}
@@ -724,9 +763,8 @@ export default function DoctorProfile() {
               </button>
             </div>
           </div>
-
           {selectedTab === "messageToDoctor" && (
-            <div>
+            <div className={styles.messageToDoctor}>
               <p>You can send something to the doctor you want:</p>
               <select
                 className={`form-select ${styles.input} ${
@@ -739,7 +777,7 @@ export default function DoctorProfile() {
                   handleInputChange(event, "selectedDoctorForMessage")
                 }
               >
-                <option value="">Select an option</option>
+                <option value="">Select a Doctor</option>
                 {user &&
                   doctorsList &&
                   doctorsList
@@ -749,20 +787,48 @@ export default function DoctorProfile() {
                         key={doctor.email}
                         value={`${doctor.firstName} ${doctor.lastName}`}
                       >
-                        To: {doctor.firstName} {doctor.lastName}
+                        {doctor.firstName} {doctor.lastName}
                       </option>
                     ))}
               </select>
               {renderFormField("doctorText", "Describe...", "text")}
-              <button type="button" onClick={handleDoctorMessage}>
+              <button
+                className={styles.sendMessageButton} // Add your custom style for the send button
+                type="button"
+                onClick={() => {
+                  console.log(state.selectedDoctorForMessage);
+                  console.log(state.description);
+                  if (!state.selectedDoctorForMessage || !state.doctorText) {
+                    Swal.fire({
+                      title: "Error",
+                      text: "Please select a doctor and provide a description.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  } else {
+                    Swal.fire({
+                      title: "Send Inquiry",
+                      text: "Are you sure you want to send this inquiry?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonText: "Send",
+                      cancelButtonText: "Cancel",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handleDoctorMessage();
+                      }
+                    });
+                  }
+                }}
+              >
                 Send
               </button>
             </div>
           )}
           {selectedTab === "messageToPatient" && (
-            <div>
-              <p>You can send to your patients you want a message</p>
-              <p>please choose a patient and describe your message:</p>
+            <div className={styles.messageToPatient}>
+              <p>You can send a message to your patients:</p>
+              <p>Please choose a patient and describe your message:</p>
               <select
                 className={`form-select ${styles.input} ${
                   state.selectedPatientForMessage ? styles.invalid : ""
@@ -774,28 +840,57 @@ export default function DoctorProfile() {
                   handleInputChange(event, "selectedPatientForMessage")
                 }
               >
-                <option value="">Select an option</option>
+                <option value="">Select a Patient</option>
                 {user &&
                   user.patients &&
                   user.patients.map((patient) => (
                     <option
-                      key={patient.id}
+                      key={patient.email}
                       value={`${patient.firstName} ${patient.lastName}`}
                     >
-                      To: {patient.firstName} {patient.lastName}
+                      {patient.firstName} {patient.lastName}
                     </option>
                   ))}
               </select>
-
               {renderFormField("patientText", "Describe here...", "text")}
-              <button type="button" onClick={handlePatientMessage}>
-                send
+              <button
+                className={styles.sendMessageButton}
+                type="button"
+                onClick={() => {
+                  console.log(state.selectedPatientForMessage);
+                  console.log(state.patientText);
+                  if (!state.selectedPatientForMessage || !state.patientText) {
+                    Swal.fire({
+                      title: "Error",
+                      text: "Please select a patient and provide a description.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  } else {
+                    Swal.fire({
+                      title: "Send Inquiry",
+                      text: "Are you sure you want to send this inquiry?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonText: "Send",
+                      cancelButtonText: "Cancel",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handlePatientMessage();
+                      }
+                    });
+                  }
+                }}
+              >
+                Send
               </button>
             </div>
           )}
           {selectedTab === "inquiries" && (
             <div className={styles.inquiries}>
-              <div>Here are your answered inquiries</div>
+              <div className={styles.answeredTitle}>
+                Here are your answered inquiries
+              </div>
               {user?.inquiriesList?.map((inquiry, index) => {
                 const patient = inquiry.hasAnswered
                   ? patientsList.find((patient) =>
@@ -817,20 +912,20 @@ export default function DoctorProfile() {
                   (doctor || patient) && (
                     <div className={styles.inquiry} key={index}>
                       <span>{`${inquiry.id}`}</span>
-                      <span>
+                      <span className={styles.patientDoctorName}>
                         {patient
-                          ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                          ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
                           : ""}
                       </span>
-                      <span>
+                      <span className={styles.patientDoctorName}>
                         {doctor
-                          ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
+                          ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
                           : ""}
                       </span>
                       {inquiry.hasAnswered && (
                         <>
-                          <div>message: {inquiry.symptoms}</div>
-                          <div>Answer: {inquiry.answer} </div>
+                          <div>Message: {inquiry.symptoms}</div>
+                          <div>Answer: {inquiry.answer}</div>
                         </>
                       )}
                     </div>
@@ -839,8 +934,12 @@ export default function DoctorProfile() {
               })}
               {user?.inquiriesList?.every(
                 (inquiry) => !inquiry.hasAnswered
-              ) && <p>No answered inquiries yet</p>}
-              <div>Here are your unanswered inquiries</div>
+              ) && (
+                <p className={styles.noInquiries}>No answered inquiries yet</p>
+              )}
+              <div className={styles.unansweredTitle}>
+                Here are your unanswered inquiries
+              </div>
               {user?.inquiriesList?.map((inquiry, index) => {
                 const patient =
                   !inquiry.hasAnswered &&
@@ -858,22 +957,21 @@ export default function DoctorProfile() {
                         doctor.email !== user.email
                     )
                   );
-                console.log(user.inquiriesList);
                 return (
                   (doctor || patient) && (
                     <div className={styles.inquiry} key={index}>
                       <span>{`${inquiry.id}`}</span>
-                      <span>
+                      <span className={styles.patientDoctorName}>
                         {patient
-                          ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                          ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
                           : ""}
                       </span>
-                      <span>
+                      <span className={styles.patientDoctorName}>
                         {doctor
-                          ? `-   with Doctor. ${doctor.firstName} ${doctor.lastName}`
+                          ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
                           : ""}
                       </span>
-                      <p>message: {inquiry.symptoms}</p>
+                      <div>Message: {inquiry.symptoms}</div>
                       {!inquiry.hasAnswered && inquiry.senderId !== user.id && (
                         <div>
                           {answerMode &&
@@ -884,20 +982,66 @@ export default function DoctorProfile() {
                             )}
                           {answerMode ? (
                             <>
-                              <button onClick={() => handleSendClick(inquiry)}>
+                              <button
+                                className={styles.sendInquiryButtons}
+                                onClick={() => {
+                                  if (state.answerText) {
+                                    Swal.fire({
+                                      title: "Do you want to send the inquiry?",
+                                      showDenyButton: true,
+                                      showCancelButton: true,
+                                      confirmButtonText: "Send",
+                                      denyButtonText: `Don't send`,
+                                      preConfirm: async () => {
+                                        try {
+                                          await handleSendClick(inquiry);
+                                          return true;
+                                        } catch (error) {
+                                          Swal.showValidationMessage(
+                                            `Request failed: ${error}`
+                                          );
+                                          return false;
+                                        }
+                                      },
+                                    }).then((result) => {
+                                      if (result.isConfirmed) {
+                                        Swal.fire(
+                                          "Inquiry sent!",
+                                          "",
+                                          "success"
+                                        );
+                                      } else if (result.isDenied) {
+                                        Swal.fire(
+                                          "Inquiry not sent",
+                                          "",
+                                          "info"
+                                        );
+                                      }
+                                    });
+                                  } else {
+                                    Swal.fire({
+                                      title: "Error",
+                                      text: "Please provide an answer!",
+                                      icon: "error",
+                                      confirmButtonText: "OK",
+                                    });
+                                  }
+                                }}
+                              >
                                 Send
                               </button>
                               <button
+                                className={styles.sendInquiryButtons}
                                 onClick={() => handleSendToAI(inquiry, patient)}
                               >
                                 Send to AI
                               </button>
-                              <Popup open={isOpen} position="right center">
-                                {popupContent}
-                              </Popup>
                             </>
                           ) : (
-                            <button onClick={() => setAnswerMode(true)}>
+                            <button
+                              className={styles.answerInquiryButton}
+                              onClick={() => setAnswerMode(true)}
+                            >
                               Answer
                             </button>
                           )}
@@ -908,13 +1052,16 @@ export default function DoctorProfile() {
                 );
               })}
               {user?.inquiriesList?.every((inquiry) => inquiry.hasAnswered) && (
-                <p>No unanswered inquiries yet</p>
+                <p className={styles.noInquiries}>
+                  No unanswered inquiries yet
+                </p>
               )}
             </div>
           )}
+
           {selectedTab === "scheduleAppointment" && (
             <div className={styles.appointments}>
-              <div>Here's your Scheduled appointments</div>
+              <div className={styles.sectionTitle}>Scheduled Appointments</div>
               {user?.appointments?.map((appointment, index) => {
                 const patient = patientsList.find((patient) => {
                   const patientAppointments = patient.appointments || [];
@@ -926,17 +1073,30 @@ export default function DoctorProfile() {
                 return (
                   <div key={index} className={styles.appointment}>
                     <span>{appointment.date ?? ""}</span>
-                    <span>
+                    <span className={styles.patientDoctorName}>
                       {patient
-                        ? `-   with Patient. ${patient.firstName} ${patient.lastName}`
+                        ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
                         : " --none"}
                     </span>
                     {addDeleteAppointmentMode && (
                       <div className={styles.appointmentsButtons}>
                         <button
-                          onClick={() =>
-                            handleDeleteAppointment(appointment.id)
-                          }
+                          onClick={() => {
+                            // Display SweetAlert2 confirmation dialog
+                            Swal.fire({
+                              title: "Delete Appointment",
+                              text: "Are you sure you want to delete this appointment?",
+                              icon: "warning",
+                              showCancelButton: true,
+                              confirmButtonText: "Delete",
+                              cancelButtonText: "Cancel",
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                handleDeleteAppointment(appointment.id);
+                              }
+                            });
+                          }}
+                          className={styles.deleteAppointmentButton}
                         >
                           Delete
                         </button>
@@ -966,14 +1126,14 @@ export default function DoctorProfile() {
                       user.patients &&
                       user.patients.map((patient) => (
                         <option
-                          key={patient.id}
+                          key={patient.email}
                           value={`${patient.firstName} ${patient.lastName}`}
                         >
                           With: {patient.firstName} {patient.lastName}
                         </option>
                       ))}
                   </select>
-                  <form className={styles.newAppointment}>
+                  <form className={styles.newAppointmentForm}>
                     {renderFormField(
                       "newAppointmentDate",
                       "Appointment Date",
@@ -984,16 +1144,54 @@ export default function DoctorProfile() {
                       "Appointment Time",
                       "Time"
                     )}
-                    <button type="button" onClick={handleAddDeleteAppointment}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Check if date and time are set
+                        if (
+                          !state.newAppointmentDate ||
+                          !state.newAppointmentTime ||
+                          !state.selectedPatientForAppointment
+                        ) {
+                          // If date or time is not set, show an error alert
+                          Swal.fire({
+                            title: "Error",
+                            text: "Please select both date and time for the appointment, and Provide a doctor",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                          });
+                        } else {
+                          Swal.fire({
+                            title: "Add Appointment",
+                            text: "Are you sure you want to add this appointment?",
+                            icon: "question",
+                            showCancelButton: true,
+                            confirmButtonText: "Add",
+                            cancelButtonText: "Cancel",
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              handleAddDeleteAppointment();
+                            }
+                          });
+                        }
+                      }}
+                      className={styles.addAppointmentButton}
+                    >
                       Add
                     </button>
-                    <button onClick={() => setAddDeleteAppointmentMode(false)}>
+                    <button
+                      onClick={() => setAddDeleteAppointmentMode(false)}
+                      className={styles.doneAppointmentButton}
+                    >
                       Done
                     </button>
                   </form>
                 </>
               ) : (
-                <button onClick={() => setAddDeleteAppointmentMode(true)}>
+                <button
+                  onClick={() => setAddDeleteAppointmentMode(true)}
+                  className={styles.addDeleteAppointmentButton}
+                >
                   Add / Delete Appointment
                 </button>
               )}
@@ -1001,7 +1199,11 @@ export default function DoctorProfile() {
           )}
           {selectedTab === "addPatient" && (
             <div className={styles.addDoctors}>
-              <p>If you want To add Patients, please select Patient:</p>
+              <p className={styles.formTitle}>Add Patients</p>
+              <p className={styles.formDescription}>
+                If you want to add patients, please select a patient from the
+                list:
+              </p>
               <select
                 className={`form-select ${styles.input} ${
                   state.newPatient ? styles.invalid : ""
@@ -1016,15 +1218,42 @@ export default function DoctorProfile() {
                   patientsList &&
                   patientsList.map((patient) => (
                     <option
-                      key={patient.id}
+                      key={patient.email}
                       value={`${patient.firstName} ${patient.lastName}`}
                     >
-                      {patient.firstName} {patient.lastName}
+                      {`${patient.firstName} ${patient.lastName}`}
                     </option>
                   ))}
               </select>
 
-              <button onClick={handleAddPatient}>Add Patient</button>
+              <button
+                className={styles.addPatientButton}
+                onClick={() => {
+                  if (!state.newPatient) {
+                    Swal.fire({
+                      title: "Error",
+                      text: "Please provide details for the new patient.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  } else {
+                    Swal.fire({
+                      title: "Add Patient",
+                      text: "Are you sure you want to add this patient?",
+                      icon: "question",
+                      showCancelButton: true,
+                      confirmButtonText: "Add",
+                      cancelButtonText: "Cancel",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handleAddPatient();
+                      }
+                    });
+                  }
+                }}
+              >
+                Add Patient
+              </button>
             </div>
           )}
         </div>

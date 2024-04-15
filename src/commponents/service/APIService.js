@@ -364,6 +364,7 @@ class APIService {
 
   async addInquiryFromDoctorToDoctor(doctor, doctor2, description) {
     const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    console.log("+++++", doctor2);
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
