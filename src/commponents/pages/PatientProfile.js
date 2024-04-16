@@ -20,6 +20,8 @@ export default function PatientProfile() {
   const [userType, setUserType] = useState("");
   const [selectedTab, setSelectedTab] = useState("");
   const Swal = require("sweetalert2");
+  const [answeredOpen, setAnsweredOpen] = useState(false);
+  const [unansweredOpen, setUnansweredOpen] = useState(false);
 
   const defaultState = {
     id: "",
@@ -553,10 +555,10 @@ export default function PatientProfile() {
           {selectedTab === "messageToDoctor" && (
             <div className={styles.messageToDoctor}>
               <p>
-                You can send a description of your symptoms to the doctor of
-                your choice.
+                You may submit a detailed description of your symptoms to the
+                healthcare provider of your preference. Kindly select a doctor
+                and articulate your symptoms:
               </p>
-              <p>Please choose a doctor and explain your symptoms:</p>
               <select
                 className={`form-select ${styles.input} ${
                   state.selectedDoctorForMessageError ? styles.invalid : ""
@@ -625,86 +627,110 @@ export default function PatientProfile() {
 
           {selectedTab === "inquiries" && (
             <div className={styles.inquiries}>
-              <div className={styles.sectionTitle}>Here are your inquiries</div>
               <div className={styles.answeredInquiries}>
-                <div className={styles.subTitle}>Answered Inquiries</div>
-                {user?.inquiriesList?.map((inquiry, index) => {
-                  const doctor = inquiry.hasAnswered
-                    ? doctorsList.find((doc) =>
-                        doc.inquiriesList.some(
-                          (doctorInquiry) => doctorInquiry.id === inquiry.id
+                <div
+                  className={styles.subTitle}
+                  onClick={() => setAnsweredOpen(!answeredOpen)}
+                >
+                  {answeredOpen ? (
+                    <span className={styles.openIndicator}>&#10533; </span>
+                  ) : (
+                    <span className={styles.openIndicator}>&#10532; </span>
+                  )}
+                  Answered Inquiries
+                </div>
+                {answeredOpen &&
+                  user?.inquiriesList?.map((inquiry, index) => {
+                    const doctor = inquiry.hasAnswered
+                      ? doctorsList.find((doc) =>
+                          doc.inquiriesList.some(
+                            (doctorInquiry) => doctorInquiry.id === inquiry.id
+                          )
                         )
-                      )
-                    : null;
-                  return (
-                    inquiry.hasAnswered && (
-                      <div key={index} className={styles.inquiry}>
-                        <div
-                          className={styles.inquiryId}
-                        >{`Inquiry ID: ${inquiry.id}`}</div>
-                        <div>
-                          {doctor &&
-                            `-   with Dr. ${doctor.firstName} ${doctor.lastName}`}
+                      : null;
+                    return (
+                      inquiry.hasAnswered && (
+                        <div key={index} className={styles.inquiry}>
+                          <div
+                            className={styles.inquiryId}
+                          >{`Inquiry ID: ${inquiry.id}`}</div>
+                          <div>
+                            {doctor &&
+                              `-   with Dr. ${doctor.firstName} ${doctor.lastName}`}
+                          </div>
+                          {inquiry.hasAnswered && (
+                            <>
+                              <div className={styles.message}>
+                                Message: {inquiry.symptoms}
+                              </div>
+                              <div className={styles.answer}>
+                                Answer: {inquiry.answer}
+                              </div>
+                            </>
+                          )}
                         </div>
-                        {inquiry.hasAnswered && (
-                          <>
-                            <div className={styles.message}>
-                              Message: {inquiry.symptoms}
-                            </div>
-                            <div className={styles.answer}>
-                              Answer: {inquiry.answer}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )
-                  );
-                })}
-                {user?.inquiriesList?.every(
-                  (inquiry) => !inquiry.hasAnswered
-                ) && (
-                  <div className={styles.noAnswered}>
-                    No answered inquiries yet
-                  </div>
-                )}
+                      )
+                    );
+                  })}
+                {answeredOpen &&
+                  user?.inquiriesList?.every(
+                    (inquiry) => !inquiry.hasAnswered
+                  ) && (
+                    <div className={styles.noAnswered}>
+                      No answered inquiries yet
+                    </div>
+                  )}
               </div>
               <div className={styles.unansweredInquiries}>
-                <div className={styles.subTitle}>Unanswered Inquiries</div>
-                {user?.inquiriesList?.map((inquiry, index) => {
-                  const doctor = !inquiry.hasAnswered
-                    ? doctorsList.find((doc) =>
-                        doc.inquiriesList.some(
-                          (doctorInquiry) => doctorInquiry.id === inquiry.id
+                <div
+                  className={styles.subTitle}
+                  onClick={() => setUnansweredOpen(!unansweredOpen)}
+                >
+                  {unansweredOpen ? (
+                    <span className={styles.openIndicator}>&#10533; </span>
+                  ) : (
+                    <span className={styles.openIndicator}>&#10532; </span>
+                  )}
+                  Here are your Unanswered Inquiries
+                </div>
+                {unansweredOpen &&
+                  user?.inquiriesList?.map((inquiry, index) => {
+                    const doctor = !inquiry.hasAnswered
+                      ? doctorsList.find((doc) =>
+                          doc.inquiriesList.some(
+                            (doctorInquiry) => doctorInquiry.id === inquiry.id
+                          )
                         )
+                      : null;
+                    return (
+                      !inquiry.hasAnswered && (
+                        <div key={index} className={styles.inquiry}>
+                          <div
+                            className={styles.inquiryId}
+                          >{`Inquiry ID: ${inquiry.id}`}</div>
+                          <div>
+                            {doctor &&
+                              `-   with Dr. ${doctor.firstName} ${doctor.lastName}`}
+                          </div>
+                          <div className={styles.message}>
+                            Message: {inquiry.symptoms}
+                          </div>
+                        </div>
                       )
-                    : null;
-                  return (
-                    !inquiry.hasAnswered && (
-                      <div key={index} className={styles.inquiry}>
-                        <div
-                          className={styles.inquiryId}
-                        >{`Inquiry ID: ${inquiry.id}`}</div>
-                        <div>
-                          {doctor &&
-                            `-   with Dr. ${doctor.firstName} ${doctor.lastName}`}
-                        </div>
-                        <div className={styles.message}>
-                          Message: {inquiry.symptoms}
-                        </div>
-                      </div>
-                    )
-                  );
-                })}
-                {user?.inquiriesList?.every(
-                  (inquiry) => inquiry.hasAnswered
-                ) && (
-                  <div className={styles.noUnanswered}>
-                    No unanswered inquiries
-                  </div>
-                )}
+                    );
+                  })}
+                {unansweredOpen &&
+                  user?.inquiriesList?.every(
+                    (inquiry) => inquiry.hasAnswered
+                  ) && (
+                    <div className={styles.noUnanswered}>
+                      No unanswered inquiries
+                    </div>
+                  )}
               </div>
             </div>
           )}
+
           {selectedTab === "scheduleAppointment" && (
             <div className={styles.appointments}>
               <div className={styles.sectionTitle}>Scheduled Appointments</div>

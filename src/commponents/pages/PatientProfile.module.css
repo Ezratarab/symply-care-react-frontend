@@ -70,7 +70,7 @@
 }
 
 .information p span {
-  font-weight: bold;
+  font-style: italic;
 }
 
 .right {
@@ -165,17 +165,14 @@
   border-radius: 5px;
 }
 
-.sectionTitle {
+
+.subTitle {
+  
+  cursor: pointer;
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 10px;
   color: #223673;
-}
-
-.subTitle {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-top: 20px;
 }
 
 .inquiry {
@@ -241,18 +238,18 @@
 }
 
 
-
-
 .appointment .doctorName {
   font-style: italic; /* Make the text italic */
   color: #223673;
 }
-
 .messageToDoctor {
   margin: 20px;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
 }
 
 .messageToDoctor p {
