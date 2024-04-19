@@ -3,10 +3,9 @@ import styles from "./LogIn.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import backgroundImage from '../assets/op5.jpg';
+import backgroundImage from "../assets/op5.jpg";
 import authServiceInstance from "../service/APIService";
 import { UserContext } from "../Context";
-
 
 const LogIn = () => {
   const defaultState = {
@@ -19,11 +18,10 @@ const LogIn = () => {
   const [state, setState] = useState(defaultState);
   const navigate = useNavigate();
   const { isLogin, setIsLogin } = useContext(UserContext);
-  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-  
+
     setState((prevState) => ({
       ...prevState,
       [name]: value,
@@ -37,21 +35,22 @@ const LogIn = () => {
   }
 
   const validate = () => {
-
     let passwordError = "";
     let emailError = "";
 
+    // Regular expression for validating email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (state.email === false) {
-      emailError = "Email Field is Invalid ";
+    if (!state.email || !emailRegex.test(state.email)) {
+      emailError = "Invalid email address";
     }
 
     if (!state.password) {
-      passwordError = "Password field is required";
+      passwordError = "Message field is required";
     }
 
-    if ( passwordError || emailError) {
-      setState({ ...state,passwordError, emailError });
+    if (passwordError || emailError) {
+      setState({ ...state, passwordError, emailError });
       return false;
     }
 
@@ -64,31 +63,28 @@ const LogIn = () => {
       setState(defaultState);
       e.preventDefault();
 
-    authServiceInstance.login(state.email, state.password)
-        .then(
-            (response) => {
-
-                console.log('Login successful')
-                console.log('Response data:', response.data);
-                navigate('/home');
-                window.location.reload();
-                console.log('Login successful');
-                handleLoginLogout()
-            },
-            (error) => {
-                console.error('Login error:', error);
-                navigate('/signup');
-            }
-        );
+      authServiceInstance.login(state.email, state.password).then(
+        (response) => {
+          console.log("Login successful");
+          console.log("Response data:", response.data);
+          navigate("/home");
+          window.location.reload();
+          console.log("Login successful");
+          handleLoginLogout();
+        },
+        (error) => {
+          console.error("Login error:", error);
+          navigate("/signup");
+        }
+      );
     }
   };
-
 
   return (
     <div className={styles.app}>
       <div className={`container-fluid ${styles.psMd0}`}>
         <div className="row g-0">
-        <div
+          <div
             className={`d-none d-md-flex col-md-4 col-lg-6 ${styles.bgImage}`}
             style={{ backgroundImage: `url(${backgroundImage})` }}
           ></div>
@@ -172,13 +168,13 @@ const LogIn = () => {
                           className={`d-flex justify-content-between mb-2 ${styles.forgotRegisterButtons}`}
                         >
                           <Link to="/forgotPassword">
-                          <button
-                            className={`btn btn-lg btn-primary btn-login fw-bold ${styles.forgotPasswordButton}`}
-                            style={{ width: "115%", height: "45px" }}
-                            type="button"
-                          >
-                            Forgot password?
-                          </button>
+                            <button
+                              className={`btn btn-lg btn-primary btn-login fw-bold ${styles.forgotPasswordButton}`}
+                              style={{ width: "115%", height: "45px" }}
+                              type="button"
+                            >
+                              Forgot password?
+                            </button>
                           </Link>
                           <div style={{ width: "48%" }}>
                             <Link to="/signup">

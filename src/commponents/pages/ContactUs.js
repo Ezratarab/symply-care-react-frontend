@@ -3,14 +3,16 @@ import styles from "./ContactUs.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { Link } from "react-router-dom";
-import backgroundImage from '../assets/contactus.jpg';
+import backgroundImage from "../assets/contactus.jpg";
+import APIService from "../service/APIService";
+import Swal from "sweetalert2";
 
 const ContactUs = () => {
   const defaultState = {
-    text:"",
-    id:"",
+    text: "",
+    email: "",
     textError: "",
-    IdError: "",
+    emailError: "",
   };
 
   const [state, setState] = useState(defaultState);
@@ -28,18 +30,20 @@ const ContactUs = () => {
 
   const validate = () => {
     let textError = "";
-    let IdError = "";
+    let emailError = "";
 
-    const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!state.id || reg.test(state.id) === false) {
-      IdError = "ID Field is Invalid ";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!state.email || !emailRegex.test(state.email)) {
+      emailError = "Invalid email address";
     }
+
     if (!state.text) {
       textError = "Message field is required";
     }
 
-    if (textError || IdError) {
-      setState({ ...state, textError,IdError });
+    if (textError || emailError) {
+      setState({ ...state, textError, emailError });
       return false;
     }
 
@@ -48,8 +52,37 @@ const ContactUs = () => {
 
   const submit = () => {
     if (validate()) {
-      console.warn(state);
-      setState(defaultState);
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to send this message?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, send it!",
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.warn(state);
+          const response = APIService.contactUs(state.email, state.text);
+
+          if (response) {
+            Swal.fire({
+              title: "Success!",
+              text: "Your message has been sent successfully.",
+              icon: "success",
+            });
+            console.log("Inquiry has been answered successfully: ", response);
+            window.location.reload();
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "There was an error sending your message.",
+              icon: "error",
+            });
+            console.error("Empty response or missing data in the response.");
+          }
+          setState(defaultState);
+        }
+      });
     }
   };
 
@@ -57,7 +90,7 @@ const ContactUs = () => {
     <div className={styles.app}>
       <div className={`container-fluid ${styles.psMd0}`}>
         <div className="row g-0">
-        <div
+          <div
             className={`d-none d-md-flex col-md-4 col-lg-6 ${styles.bgImage}`}
             style={{ backgroundImage: `url(${backgroundImage})` }}
           ></div>
@@ -79,23 +112,22 @@ const ContactUs = () => {
                         className={`form-floating mb-3 ${styles.formFloating}`}
                       >
                         <input
-                          type="id"
+                          type="text"
                           className={`form-control ${styles.input} ${
-                            state.IdError ? styles.invalid : ""
+                            state.emailError ? styles.invalid : ""
                           }`}
                           id="floatingInput"
-                          name="id"
-                          placeholder="id number"
-                          value={state.id}
+                          name="email"
+                          placeholder="email"
+                          value={state.email}
                           onChange={handleInputChange}
                         />
-                        <label htmlFor="floatingInput">ID Number</label>
-                        <span className={`text-danger ${styles.IdError}`}>
-                          {state.IdError}
+                        <label htmlFor="floatingInput">Your Email</label>
+                        <span className={`text-danger ${styles.emailError}`}>
+                          {state.emailError}
                         </span>
                       </div>
 
-                      
                       <div
                         className={`form-floating mb-3 ${styles.formFloating}`}
                       >

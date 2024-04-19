@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Doctor from "../../Doctor";
+import Doctor from "../Doctor";
 import "./Doctors.css";
 import APIService from "../service/APIService";
 

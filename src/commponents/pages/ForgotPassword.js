@@ -2,54 +2,98 @@ import React, { useState } from "react";
 import styles from "./ForgotPassword.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import APIService from "../service/APIService";
 import backgroundImage from "../assets/contactus.jpg";
-
+import Swal from "sweetalert2";
 const ForgotPassword = () => {
   const defaultState = {
-    text: "",
+    email: "",
+    newPassword: "",
     id: "",
-    textError: "",
-    IdError: "",
+    emailError: "",
+    newPasswordError: "",
+    idError: "",
   };
 
   const [state, setState] = useState(defaultState);
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-
-    setState({
-      ...state,
-      [name]: value,
-    });
+    const { name, value } = event.target;
+    setState({ ...state, [name]: value });
   };
 
   const validate = () => {
-    let textError = "";
-    let IdError = "";
+    let emailError = "";
+    let newPasswordError = "";
+    let idError = "";
 
-    const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!state.id || reg.test(state.id) === false) {
-      IdError = "ID Field is Invalid ";
-    }
-    if (!state.text) {
-      textError = "Message field is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!state.email || !emailRegex.test(state.email)) {
+      emailError = "Please enter a valid email address";
     }
 
-    if (textError || IdError) {
-      setState({ ...state, textError, IdError });
+    if (!state.newPassword) {
+      newPasswordError = "Please enter a new password";
+    }
+
+    const idRegex = /^\d+$/; // Only allow digits for the ID number
+    if (!state.id || !idRegex.test(state.id)) {
+      idError = "Please enter a valid ID number";
+    }
+
+    if (emailError || newPasswordError || idError) {
+      setState({ ...state, emailError, newPasswordError, idError });
       return false;
     }
 
     return true;
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (validate()) {
-      console.warn(state);
-      setState(defaultState);
+      const confirmed = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: "Do you want to change your password?",
+        showCancelButton: true,
+        confirmButtonText: "Yes, chnage it!",
+        cancelButtonText: "No, cancel",
+      });
+
+      if (confirmed.isConfirmed) {
+        try {
+          const success = await APIService.changePassword(
+            state.email,
+            state.id,
+            state.newPassword
+          );
+          if (success) {
+            Swal.fire({
+              icon: "success",
+              title: "Password changed",
+              text: "Your password has been successfully changed! going to Log-In....",
+            });
+            setState(defaultState);
+            navigate("/login");
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Something went wrong. Please try again later.",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text:
+              error.response?.data ||
+              "Something went wrong. Please try again later.",
+          });
+        }
+      }
     }
   };
 
@@ -71,7 +115,7 @@ const ForgotPassword = () => {
                     className={`col-md-9 col-lg-8 mx-auto ${styles.loginForm}`}
                   >
                     <h3 className={`login-heading mb-4 ${styles.loginHeading}`}>
-                      Reset Password
+                      Change Password
                     </h3>
 
                     <form>
@@ -79,35 +123,59 @@ const ForgotPassword = () => {
                         className={`form-floating mb-3 ${styles.formFloating}`}
                       >
                         <input
-                          type="id"
+                          type="text"
                           className={`form-control ${styles.input} ${
-                            state.IdError ? styles.invalid : ""
+                            state.idError ? styles.invalid : ""
                           }`}
-                          id="floatingInput"
+                          id="id"
                           name="id"
-                          placeholder="id number"
+                          placeholder="ID Number"
                           value={state.id}
                           onChange={handleInputChange}
                         />
-                        <label htmlFor="floatingInput">ID Number</label>
-                        <span className={`text-danger ${styles.IdError}`}>
-                          {state.IdError}
+                        <label htmlFor="id">ID Number</label>
+                        <span className={`text-danger ${styles.error}`}>
+                          {state.idError}
+                        </span>
+                      </div>
+                      <div
+                        className={`form-floating mb-3 ${styles.formFloating}`}
+                      >
+                        <input
+                          type="email"
+                          className={`form-control ${styles.input} ${
+                            state.emailError ? styles.invalid : ""
+                          }`}
+                          id="email"
+                          name="email"
+                          placeholder="Email Address"
+                          value={state.email}
+                          onChange={handleInputChange}
+                        />
+                        <label htmlFor="email">Email Address</label>
+                        <span className={`text-danger ${styles.error}`}>
+                          {state.emailError}
                         </span>
                       </div>
 
-                      <div className={`form-check mb-3 ${styles.formCheck}`}>
+                      <div
+                        className={`form-floating mb-3 ${styles.formFloating}`}
+                      >
                         <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                          id="rememberPasswordCheck"
+                          type="password"
+                          className={`form-control ${styles.input} ${
+                            state.newPasswordError ? styles.invalid : ""
+                          }`}
+                          id="newPassword"
+                          name="newPassword"
+                          placeholder="New Password"
+                          value={state.newPassword}
+                          onChange={handleInputChange}
                         />
-                        <label
-                          className={`form-check-label ${styles.checkboxLabel}`}
-                          htmlFor="rememberPasswordCheck"
-                        >
-                          Remember password
-                        </label>
+                        <label htmlFor="newPassword">New Password</label>
+                        <span className={`text-danger ${styles.error}`}>
+                          {state.newPasswordError}
+                        </span>
                       </div>
 
                       <div className={`d-grid ${styles.grid}`}>
@@ -116,7 +184,7 @@ const ForgotPassword = () => {
                           type="button"
                           onClick={submit}
                         >
-                          reset password
+                          Reset Password
                         </button>
                       </div>
                     </form>

@@ -17,8 +17,34 @@ const SIGNUP_DOCTOR_URL = "http://localhost:8080/doctors/addDoctor";
 const SIGNUP_PATIENT_URL = "http://localhost:8080/patients/addPatient";
 const UPDATE_PATIENT_URL = "http://localhost:8080/patients/updatePatient/";
 const UPDATE_DOCTOR_URL = "http://localhost:8080/doctors/updateDoctor/";
+const CONTACT_US_URL = "http://localhost:8080/contactUs/";
+const CHANGE_PASSWORD_URL = "http://localhost:8080/changePassword/";
 
 class APIService {
+  contactUs(email, message) {
+    return axios.post(`${CONTACT_US_URL}${email}`, message);
+  }
+  changePassword = async (email, id, newPassword) => {
+    try {
+      const data = {
+        id: id,
+        password: newPassword,
+      };
+
+      const response = await axios.post(`${CHANGE_PASSWORD_URL}${email}`, data);
+
+      if (response.status === 200) {
+        console.log("Password changed successfully");
+        return true; // Return true for success
+      } else {
+        console.error("Error changing password:", response);
+        return false; // Return false for other status codes
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      throw error; // Rethrow the error for proper handling
+    }
+  };
   getAllDoctors() {
     return axios.get(DOCTORS_LIST_URL);
   }

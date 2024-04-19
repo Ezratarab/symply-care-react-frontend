@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import styles from "./SignUp.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
-import Doctor from "../../Doctor";
 import { UserContext } from "../Context";
 import { useNavigate } from "react-router-dom";
 import authServiceInstance from "../service/APIService";

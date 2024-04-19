@@ -6,11 +6,8 @@ import authServicehelpers from "../service/AuthServiceHelpers";
 import defaultImage from "../assets/user.png";
 import APIService from "../service/APIService";
 import AuthWrapper from "../service/AuthWrapper";
-import Inquiry from "../Inquiry";
-import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import { saveAs } from "file-saver";
-import { Document, Packer, Paragraph, TextRun } from "docx";
 import Swal from "sweetalert2";
 
 export default function DoctorProfile() {
@@ -29,6 +26,7 @@ export default function DoctorProfile() {
   const Swal = require("sweetalert2");
   const [answeredOpen, setAnsweredOpen] = useState(false);
   const [unansweredOpen, setUnansweredOpen] = useState(false);
+  const { DateTime } = require("luxon");
 
   const defaultState = {
     id: "",
@@ -134,6 +132,10 @@ export default function DoctorProfile() {
       console.error("Please provide a description.");
     }
   };
+  function preprocessDate(dateString) {
+    dateString = dateString.replace("T", " ");
+    return dateString.replace(/\.\d{1,3}[\+\-]\d{2}:\d{2}$/, "");
+  }
 
   const handleSendToAI = async (inquiry, patient) => {
     console.log("Sending to AI:");
@@ -489,6 +491,33 @@ export default function DoctorProfile() {
       <span className={`text-danger ${styles.errorText}`}>
         {state[`${fieldName}Error`]}
       </span>
+    </div>
+  );
+  const renderFormAnswerField = (
+    fieldName,
+    placeholder,
+    type = "text",
+    value,
+    onChange
+  ) => (
+    <div className={`form-floating mb-3 ${styles.formFloating}`}>
+      <input
+        type={type}
+        className={`form-control ${styles.input}`}
+        id={`floating${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`}
+        name={fieldName}
+        placeholder={placeholder}
+        value={value || ""}
+        onChange={onChange} // Pass onChange handler directly
+      />
+
+      <label
+        htmlFor={`floating${
+          fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+        }`}
+      >
+        {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+      </label>
     </div>
   );
 
@@ -901,49 +930,74 @@ export default function DoctorProfile() {
                 )}
                 Here are your answered inquiries
               </div>
+
               {answeredOpen && (
                 <div className={styles.inquiries}>
-                  {user?.inquiriesList?.map((inquiry, index) => {
-                    const patient = inquiry.hasAnswered
-                      ? patientsList.find((patient) =>
-                          patient.inquiriesList?.some(
-                            (patientInquiry) => patientInquiry.id === inquiry.id
+                  {user?.inquiriesList
+                    ?.sort((a, b) => {
+                      const dateA = DateTime.fromISO(a.createdAt);
+                      const dateB = DateTime.fromISO(b.createdAt);
+                      if (dateA > dateB) {
+                        return -1;
+                      } else if (dateA < dateB) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })
+                    .map((inquiry, index) => {
+                      const patient = inquiry.hasAnswered
+                        ? patientsList.find((patient) =>
+                            patient.inquiriesList?.some(
+                              (patientInquiry) =>
+                                patientInquiry.id === inquiry.id
+                            )
                           )
-                        )
-                      : null;
-                    const doctor = inquiry.hasAnswered
-                      ? doctorsList.find((doctor) =>
-                          doctor.inquiriesList?.some(
-                            (doctorInquiry) =>
-                              doctorInquiry.id === inquiry.id &&
-                              doctor.email !== user.email
+                        : null;
+                      console.log(user.inquiriesList);
+                      const doctor = inquiry.hasAnswered
+                        ? doctorsList.find((doctor) =>
+                            doctor.inquiriesList?.some(
+                              (doctorInquiry) =>
+                                doctorInquiry.id === inquiry.id &&
+                                doctor.email !== user.email
+                            )
                           )
+                        : null;
+                      return (
+                        (doctor || patient) && (
+                          <div className={styles.inquiry} key={index}>
+                            <span>{`${inquiry.id}`}</span>
+                            <span className={styles.patientDoctorName}>
+                              {patient
+                                ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
+                                : ""}
+                            </span>
+                            <span className={styles.patientDoctorName}>
+                              {doctor
+                                ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
+                                : ""}
+                            </span>
+                            <div className={styles.patientDoctorName}>
+                              {`created at: ${preprocessDate(
+                                inquiry.createdAt
+                              )}`}
+                            </div>
+                            <div className={styles.patientDoctorName}>
+                              {`answered at: ${preprocessDate(
+                                inquiry.answeredAt
+                              )}`}
+                            </div>
+                            {inquiry.hasAnswered && (
+                              <>
+                                <div>Message: {inquiry.symptoms}</div>
+                                <div>Answer: {inquiry.answer}</div>
+                              </>
+                            )}
+                          </div>
                         )
-                      : null;
-                    return (
-                      (doctor || patient) && (
-                        <div className={styles.inquiry} key={index}>
-                          <span>{`${inquiry.id}`}</span>
-                          <span className={styles.patientDoctorName}>
-                            {patient
-                              ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
-                              : ""}
-                          </span>
-                          <span className={styles.patientDoctorName}>
-                            {doctor
-                              ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
-                              : ""}
-                          </span>
-                          {inquiry.hasAnswered && (
-                            <>
-                              <div>Message: {inquiry.symptoms}</div>
-                              <div>Answer: {inquiry.answer}</div>
-                            </>
-                          )}
-                        </div>
-                      )
-                    );
-                  })}
+                      );
+                    })}
                   {user?.inquiriesList?.every(
                     (inquiry) => !inquiry.hasAnswered
                   ) && (
@@ -953,6 +1007,7 @@ export default function DoctorProfile() {
                   )}
                 </div>
               )}
+
               <div
                 className={styles.unansweredTitle}
                 onClick={() => setUnansweredOpen(!unansweredOpen)}
@@ -966,121 +1021,140 @@ export default function DoctorProfile() {
               </div>
               {unansweredOpen && (
                 <div className={styles.inquiries}>
-                  {user?.inquiriesList?.map((inquiry, index) => {
-                    const patient =
-                      !inquiry.hasAnswered &&
-                      patientsList?.find((patient) =>
-                        patient.inquiriesList?.some(
-                          (patientInquiry) => patientInquiry.id === inquiry.id
-                        )
-                      );
-                    const doctor =
-                      !inquiry.hasAnswered &&
-                      doctorsList?.find((doctor) =>
-                        doctor.inquiriesList?.some(
-                          (doctorInquiry) =>
-                            doctorInquiry.id === inquiry.id &&
-                            doctor.email !== user.email
-                        )
-                      );
-                    return (
-                      (doctor || patient) && (
-                        <div className={styles.inquiry} key={index}>
-                          <span>{`${inquiry.id}`}</span>
-                          <span className={styles.patientDoctorName}>
-                            {patient
-                              ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
-                              : ""}
-                          </span>
-                          <span className={styles.patientDoctorName}>
-                            {doctor
-                              ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
-                              : ""}
-                          </span>
-                          <div>Message: {inquiry.symptoms}</div>
-                          {!inquiry.hasAnswered &&
-                            inquiry.senderId !== user.id && (
-                              <div>
-                                {answerMode &&
-                                  renderFormField(
-                                    "answerText",
-                                    "Answer here",
-                                    "text"
-                                  )}
-                                {answerMode ? (
-                                  <>
-                                    <button
-                                      className={styles.sendInquiryButtons}
-                                      onClick={() => {
-                                        if (state.answerText) {
-                                          Swal.fire({
-                                            title:
-                                              "Do you want to send the inquiry?",
-                                            showDenyButton: true,
-                                            showCancelButton: true,
-                                            confirmButtonText: "Send",
-                                            denyButtonText: `Don't send`,
-                                            preConfirm: async () => {
-                                              try {
-                                                await handleSendClick(inquiry);
-                                                return true;
-                                              } catch (error) {
-                                                Swal.showValidationMessage(
-                                                  `Request failed: ${error}`
+                  {user?.inquiriesList
+                    ?.sort((a, b) => {
+                      const dateA = DateTime.fromISO(a.createdAt);
+                      const dateB = DateTime.fromISO(b.createdAt);
+                      if (dateA > dateB) {
+                        return -1;
+                      } else if (dateA < dateB) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })
+                    ?.map((inquiry, index) => {
+                      const patient =
+                        !inquiry.hasAnswered &&
+                        patientsList?.find((patient) =>
+                          patient.inquiriesList?.some(
+                            (patientInquiry) => patientInquiry.id === inquiry.id
+                          )
+                        );
+                      const doctor =
+                        !inquiry.hasAnswered &&
+                        doctorsList?.find((doctor) =>
+                          doctor.inquiriesList?.some(
+                            (doctorInquiry) =>
+                              doctorInquiry.id === inquiry.id &&
+                              doctor.email !== user.email
+                          )
+                        );
+                      return (
+                        (doctor || patient) && (
+                          <div className={styles.inquiry} key={index}>
+                            <span>{`${inquiry.id}`}</span>
+                            <span className={styles.patientDoctorName}>
+                              {patient
+                                ? `-   with Patient: ${patient.firstName} ${patient.lastName}`
+                                : ""}
+                            </span>
+                            <span className={styles.patientDoctorName}>
+                              {doctor
+                                ? `-   with Doctor: ${doctor.firstName} ${doctor.lastName}`
+                                : ""}
+                            </span>
+                            <div className={styles.patientDoctorName}>
+                              {`created at: ${preprocessDate(
+                                inquiry.createdAt
+                              )}`}
+                            </div>
+                            <div>Message: {inquiry.symptoms}</div>
+                            {!inquiry.hasAnswered &&
+                              inquiry.senderId !== user.id && (
+                                <div>
+                                  {answerMode &&
+                                    renderFormField(
+                                      "answerText",
+                                      "Answer here",
+                                      "text"
+                                    )}
+                                  {answerMode ? (
+                                    <>
+                                      <button
+                                        className={styles.sendInquiryButtons}
+                                        onClick={() => {
+                                          if (state.answerText) {
+                                            Swal.fire({
+                                              title:
+                                                "Do you want to send the inquiry?",
+                                              showDenyButton: true,
+                                              showCancelButton: true,
+                                              confirmButtonText: "Send",
+                                              denyButtonText: `Don't send`,
+                                              preConfirm: async () => {
+                                                try {
+                                                  await handleSendClick(
+                                                    inquiry
+                                                  );
+                                                  return true;
+                                                } catch (error) {
+                                                  Swal.showValidationMessage(
+                                                    `Request failed: ${error}`
+                                                  );
+                                                  return false;
+                                                }
+                                              },
+                                            }).then((result) => {
+                                              if (result.isConfirmed) {
+                                                Swal.fire(
+                                                  "Inquiry sent!",
+                                                  "",
+                                                  "success"
                                                 );
-                                                return false;
+                                              } else if (result.isDenied) {
+                                                Swal.fire(
+                                                  "Inquiry not sent",
+                                                  "",
+                                                  "info"
+                                                );
                                               }
-                                            },
-                                          }).then((result) => {
-                                            if (result.isConfirmed) {
-                                              Swal.fire(
-                                                "Inquiry sent!",
-                                                "",
-                                                "success"
-                                              );
-                                            } else if (result.isDenied) {
-                                              Swal.fire(
-                                                "Inquiry not sent",
-                                                "",
-                                                "info"
-                                              );
-                                            }
-                                          });
-                                        } else {
-                                          Swal.fire({
-                                            title: "Error",
-                                            text: "Please provide an answer!",
-                                            icon: "error",
-                                            confirmButtonText: "OK",
-                                          });
+                                            });
+                                          } else {
+                                            Swal.fire({
+                                              title: "Error",
+                                              text: "Please provide an answer!",
+                                              icon: "error",
+                                              confirmButtonText: "OK",
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        Send
+                                      </button>
+                                      <button
+                                        className={styles.sendInquiryButtons}
+                                        onClick={() =>
+                                          handleSendToAI(inquiry, patient)
                                         }
-                                      }}
-                                    >
-                                      Send
-                                    </button>
+                                      >
+                                        Send to AI
+                                      </button>
+                                    </>
+                                  ) : (
                                     <button
-                                      className={styles.sendInquiryButtons}
-                                      onClick={() =>
-                                        handleSendToAI(inquiry, patient)
-                                      }
+                                      className={styles.answerInquiryButton}
+                                      onClick={() => setAnswerMode(true)}
                                     >
-                                      Send to AI
+                                      Answer
                                     </button>
-                                  </>
-                                ) : (
-                                  <button
-                                    className={styles.answerInquiryButton}
-                                    onClick={() => setAnswerMode(true)}
-                                  >
-                                    Answer
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                        </div>
-                      )
-                    );
-                  })}
+                                  )}
+                                </div>
+                              )}
+                          </div>
+                        )
+                      );
+                    })}
                   {user?.inquiriesList?.every(
                     (inquiry) => inquiry.hasAnswered
                   ) && (
