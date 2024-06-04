@@ -38,6 +38,7 @@ export default function DoctorProfile() {
     street: "",
     birthDay: "",
     newPatient: "",
+    deletePatient: "",
     doctorText: "",
     patientText: "",
     newAppointmentDate: "",
@@ -57,6 +58,7 @@ export default function DoctorProfile() {
     firstNameError: "",
     lastNameError: "",
     newPatientError: "",
+    deletePatientError: "",
     emailError: "",
     cityError: "",
     countryError: "",
@@ -332,6 +334,28 @@ export default function DoctorProfile() {
       }
     }
   };
+  const deletePatientFromDoctor = async () => {
+    if (state.deletePatient !== "") {
+      const selectedPatient = patientsList.find(
+        (patient) =>
+          `${patient.firstName} ${patient.lastName}` === state.deletePatient
+      );
+
+      try {
+        const response = await APIService.deletePatientFromDoctor(
+          user.id,
+          selectedPatient
+        );
+        setState((prevState) => ({
+          ...prevState,
+          deletePatient: "",
+        }));
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting patient from doctor:", error);
+      }
+    }
+  };
 
   const fileInputRef = useRef(null);
 
@@ -345,6 +369,12 @@ export default function DoctorProfile() {
         console.log("Image uploaded successfully:", response);
         window.location.reload();
       } catch (error) {
+        Swal.fire({
+          title: "Error",
+          text: "The selected image is too large, try another one",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         console.error("Error uploading image:", error);
       }
     }
@@ -457,6 +487,12 @@ export default function DoctorProfile() {
         console.log("Doctor appointment added successfully:", response);
         window.location.reload();
       } catch (error) {
+        Swal.fire({
+          title: "Error",
+          text: "error adding this appointment, try another date or try to send the target a question about his availability!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         console.error("Error adding patient appointment:", error);
       }
     }
@@ -789,8 +825,8 @@ export default function DoctorProfile() {
               <button onClick={() => setSelectedTab("scheduleAppointment")}>
                 Schedule Appointment
               </button>
-              <button onClick={() => setSelectedTab("addPatient")}>
-                Add Patient
+              <button onClick={() => setSelectedTab("addDeletePatient")}>
+                Add/Delete Patient
               </button>
             </div>
           </div>
@@ -1108,7 +1144,7 @@ export default function DoctorProfile() {
                                             }).then((result) => {
                                               if (result.isConfirmed) {
                                                 Swal.fire(
-                                                  "Inquiry sent!",
+                                                  "Inquiry answered successfully!",
                                                   "",
                                                   "success"
                                                 );
@@ -1190,7 +1226,6 @@ export default function DoctorProfile() {
                       <div className={styles.appointmentsButtons}>
                         <button
                           onClick={() => {
-                            // Display SweetAlert2 confirmation dialog
                             Swal.fire({
                               title: "Delete Appointment",
                               text: "Are you sure you want to delete this appointment?",
@@ -1305,64 +1340,125 @@ export default function DoctorProfile() {
               )}
             </div>
           )}
-          {selectedTab === "addPatient" && (
-            <div className={styles.addDoctors}>
-              <p className={styles.formTitle}>Add Patients</p>
-              <p className={styles.formDescription}>
-                If you want to add patients, please select a patient from the
-                list:
-              </p>
-              <select
-                className={`form-select ${styles.input} ${
-                  state.newPatient ? styles.invalid : ""
-                }`}
-                id="floatingNewPatient"
-                name="newPatient"
-                value={state["newPatient"]}
-                onChange={(event) => handleInputChange(event, "newPatient")}
-              >
-                <option value="">Select a Patient</option>
-                {user &&
-                  patientsList &&
-                  patientsList.map((patient) => (
-                    <option
-                      key={patient.email}
-                      value={`${patient.firstName} ${patient.lastName}`}
-                    >
-                      {`${patient.firstName} ${patient.lastName}`}
-                    </option>
-                  ))}
-              </select>
+          {selectedTab === "addDeletePatient" && (
+            <>
+              <div className={styles.addDoctors}>
+                <p className={styles.formTitle}>Add Patients</p>
+                <p className={styles.formDescription}>
+                  If you want to add patients, please select a patient from the
+                  list:
+                </p>
+                <select
+                  className={`form-select ${styles.input} ${
+                    state.newPatient ? styles.invalid : ""
+                  }`}
+                  id="floatingNewPatient"
+                  name="newPatient"
+                  value={state["newPatient"]}
+                  onChange={(event) => handleInputChange(event, "newPatient")}
+                >
+                  <option value="">Select a Patient</option>
+                  {user &&
+                    patientsList &&
+                    patientsList.map((patient) => (
+                      <option
+                        key={patient.email}
+                        value={`${patient.firstName} ${patient.lastName}`}
+                      >
+                        {`${patient.firstName} ${patient.lastName}`}
+                      </option>
+                    ))}
+                </select>
 
-              <button
-                className={styles.addPatientButton}
-                onClick={() => {
-                  if (!state.newPatient) {
-                    Swal.fire({
-                      title: "Error",
-                      text: "Please provide details for the new patient.",
-                      icon: "error",
-                      confirmButtonText: "OK",
-                    });
-                  } else {
-                    Swal.fire({
-                      title: "Add Patient",
-                      text: "Are you sure you want to add this patient?",
-                      icon: "question",
-                      showCancelButton: true,
-                      confirmButtonText: "Add",
-                      cancelButtonText: "Cancel",
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        handleAddPatient();
-                      }
-                    });
+                <button
+                  className={styles.addPatientButton}
+                  onClick={() => {
+                    if (!state.newPatient) {
+                      Swal.fire({
+                        title: "Error",
+                        text: "Please provide details for the new patient.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                      });
+                    } else {
+                      Swal.fire({
+                        title: "Add Patient",
+                        text: "Are you sure you want to add this patient?",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Add",
+                        cancelButtonText: "Cancel",
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          handleAddPatient();
+                        }
+                      });
+                    }
+                  }}
+                >
+                  Add Patient
+                </button>
+              </div>
+              <div className={styles.addDoctors}>
+                <p className={styles.formTitle}>Delete Patients</p>
+                <p className={styles.formDescription}>
+                  If you want to delete patients, please select a patient from
+                  your list:
+                </p>
+                <select
+                  className={`form-select ${styles.input} ${
+                    state.newPatient ? styles.invalid : ""
+                  }`}
+                  id="floatingDeletePatient"
+                  name="deletePatient"
+                  value={state["deletePatient"]}
+                  onChange={(event) =>
+                    handleInputChange(event, "deletePatient")
                   }
-                }}
-              >
-                Add Patient
-              </button>
-            </div>
+                >
+                  <option value="">Select a Patient</option>
+                  {user &&
+                    user.patients &&
+                    user.patients.map((patient) => (
+                      <option
+                        key={patient.email}
+                        value={`${patient.firstName} ${patient.lastName}`}
+                      >
+                        {`${patient.firstName} ${patient.lastName}`}
+                      </option>
+                    ))}
+                </select>
+
+                <button
+                  className={styles.addPatientButton}
+                  onClick={() => {
+                    if (!state.deletePatient) {
+                      Swal.fire({
+                        title: "Error",
+                        text: "Please provide details to the delete patient.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                      });
+                    } else {
+                      Swal.fire({
+                        title: "Delete Patient",
+                        text: "Are you sure you want to delete this patient?",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel",
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          deletePatientFromDoctor();
+                        }
+                      });
+                    }
+                  }}
+                >
+                  Delete Patient
+                </button>
+              </div>
+            </>
           )}
         </div>
       </AuthWrapper>

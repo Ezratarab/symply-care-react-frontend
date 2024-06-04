@@ -5,24 +5,32 @@ const API_URL = "http://localhost:8080";
 
 const BASE_PATIENTS_URL = "http://localhost:8080/patients/";
 const BASE_DOCTORS_URL = "http://localhost:8080/doctors/";
-const DOCTORS_LIST_URL = "http://localhost:8080/doctors/doctors";
-const DOCTORS_LIST_URL2 = "http://localhost:8080/doctors/fullDoctors";
-const PATIENTS_LIST_URL = "http://localhost:8080/patients/patients";
-const DELETE_PATIENT_URL = "http://localhost:8080/patients/deletePatient/";
-const GET_PATIENT_ID_URL = "http://localhost:8080/patients/patient/I";
-const GET_PATIENT_EMAIL_URL = "http://localhost:8080/patients/patient/E";
-const GET_DOCTOR_ID_URL = "http://localhost:8080/doctors/doctor/I";
-const GET_DOCTOR_EMAIL_URL = "http://localhost:8080/doctors/doctor/E";
-const SIGNUP_DOCTOR_URL = "http://localhost:8080/doctors/addDoctor";
-const SIGNUP_PATIENT_URL = "http://localhost:8080/patients/addPatient";
-const UPDATE_PATIENT_URL = "http://localhost:8080/patients/updatePatient/";
-const UPDATE_DOCTOR_URL = "http://localhost:8080/doctors/updateDoctor/";
-const CONTACT_US_URL = "http://localhost:8080/contactUs/";
-const CHANGE_PASSWORD_URL = "http://localhost:8080/changePassword/";
+const DOCTORS_LIST_URL = BASE_DOCTORS_URL + "doctors";
+const DOCTORS_LIST_URL2 = BASE_DOCTORS_URL + "fullDoctors";
+const PATIENTS_LIST_URL = BASE_PATIENTS_URL + "patients";
+const DELETE_PATIENT_URL = BASE_PATIENTS_URL + "deletePatient/";
+const GET_PATIENT_ID_URL = BASE_PATIENTS_URL + "patient/I";
+const GET_PATIENT_EMAIL_URL = BASE_PATIENTS_URL + "patient/E";
+const GET_DOCTOR_ID_URL = BASE_DOCTORS_URL + "doctor/I";
+const GET_DOCTOR_EMAIL_URL = BASE_DOCTORS_URL + "doctor/E";
+const SIGNUP_DOCTOR_URL = BASE_DOCTORS_URL + "addDoctor";
+const SIGNUP_PATIENT_URL = BASE_PATIENTS_URL + "addPatient";
+const UPDATE_PATIENT_URL = BASE_PATIENTS_URL + "updatePatient/";
+const UPDATE_DOCTOR_URL = BASE_DOCTORS_URL + "updateDoctor/";
+const CONTACT_US_URL = API_URL + "/contactUs/";
+const CHANGE_PASSWORD_URL = API_URL + "/changePassword/";
+const DELETE_PATIENT_FROM_DOCTOR =
+  BASE_DOCTORS_URL + "/deletePatientFromDoctor/";
+const DELETE_DOCTOR_FROM_PATIENT =
+  BASE_PATIENTS_URL + "deleteDoctorFromPatient/";
+const GET_SPECIALIZATION = API_URL + "/getSpecializations";
 
 class APIService {
   contactUs(email, message) {
     return axios.post(`${CONTACT_US_URL}${email}`, message);
+  }
+  getSpecializations() {
+    return axios.get(GET_SPECIALIZATION);
   }
   changePassword = async (email, id, newPassword) => {
     try {
@@ -108,6 +116,29 @@ class APIService {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+    });
+  }
+  deletePatientFromDoctor(doctorId, patient) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    return axios.delete(`${DELETE_PATIENT_FROM_DOCTOR}${doctorId}`, {
+      data: patient.id,
+      headers: headers,
+    });
+  }
+
+  deleteDoctorFromPatient(patientId, doctor) {
+    const token = JSON.parse(sessionStorage.getItem("user")).accessToken;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    return axios.delete(`${DELETE_DOCTOR_FROM_PATIENT}${patientId}`, {
+      data: doctor.id,
+      headers: headers,
     });
   }
 

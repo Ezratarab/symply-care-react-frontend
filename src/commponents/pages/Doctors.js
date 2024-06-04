@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Doctor from "../Doctor";
 import "./Doctors.css";
 import APIService from "../service/APIService";
+import defaultImage from "../assets/user.png";
 
 function Doctors() {
   const [doctors, setDoctors] = useState([]);
@@ -36,7 +37,11 @@ function Doctors() {
         {doctors.map((doctor) => (
           <Doctor
             key={doctor.email}
-            img={`data:image/jpeg;base64,${doctor.imageData}`} // Here's the corrected img attribute
+            img={
+              doctor.imageData
+                ? `data:image/jpeg;base64,${doctor.imageData}`
+                : null
+            } // Here's the corrected img attribute
             name={`Dr. ${doctor.firstName} ${doctor.lastName}`}
             title={doctor.specialization}
             stars={doctor.rating}

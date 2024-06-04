@@ -1,7 +1,7 @@
 .main {
   display: grid;
-  grid-template-columns: 40% auto; /* 40% for information, the rest for description */
-  border: 0.2rem solid gray;
+  grid-template-columns: 40% auto;
+  border: 0.2rem solid #223673;
   margin: 20px;
   background-color: rgb(189, 219, 240);
   border-radius: 2rem;
@@ -14,13 +14,13 @@
   margin-top: 20px;
 }
 .name {
-  font-size: 20px; /* Adjust the font size as needed */
   height: 50%;
   margin-top: 60px;
-  margin-left: -10px;
+  margin-left: 20px;
   position: relative;
   font-size: 40px;
   font-weight: bold;
+  color: #223673;
 }
 .description {
   width: 700px;
@@ -163,7 +163,7 @@
 .messageToDoctor {
   margin: 20px;
   padding: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid #223673;
   border-radius: 5px;
 }
 
@@ -192,7 +192,7 @@
 .messageToPatient {
   margin: 20px;
   padding: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid #223673;
   border-radius: 5px;
 }
 
@@ -256,7 +256,7 @@
 .appointments {
   margin: 20px;
   padding: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid #223673;
   border-radius: 5px;
 }
 
@@ -309,7 +309,7 @@
 .addDoctors {
   margin: 20px;
   padding: 20px;
-  border: 2px solid #ccc;
+  border: 2px solid #223673;
   border-radius: 5px;
 }
 
@@ -330,7 +330,7 @@
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #223673;
   border-radius: 5px;
   margin-bottom: 15px;
 }
@@ -357,7 +357,7 @@
   color: white;
   border: none;
   border-radius: 5px;
-  height: 35px;
+  height: 45px;
   width: 100px;
   cursor: pointer;
 }
@@ -378,7 +378,7 @@
   border: none;
   border-radius: 5px;
   height: 30px;
-  width:max-content;
+  width: max-content;
   margin-right: 5px;
   cursor: pointer;
 }

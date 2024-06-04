@@ -58,7 +58,7 @@ const ForgotPassword = () => {
         title: "Are you sure?",
         text: "Do you want to change your password?",
         showCancelButton: true,
-        confirmButtonText: "Yes, chnage it!",
+        confirmButtonText: "Yes, change it!",
         cancelButtonText: "No, cancel",
       });
 
@@ -77,12 +77,6 @@ const ForgotPassword = () => {
             });
             setState(defaultState);
             navigate("/login");
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: "Something went wrong. Please try again later.",
-            });
           }
         } catch (error) {
           Swal.fire({
@@ -90,7 +84,7 @@ const ForgotPassword = () => {
             title: "Error",
             text:
               error.response?.data ||
-              "Something went wrong. Please try again later.",
+              "There is a mismatch between you email and ID, Try again",
           });
         }
       }

@@ -1,10 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styles from "./SignUp.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { UserContext } from "../Context";
 import { useNavigate } from "react-router-dom";
 import authServiceInstance from "../service/APIService";
+import APIService from "../service/APIService";
 
 const SignUp = () => {
   const defaultState = {
@@ -37,12 +38,33 @@ const SignUp = () => {
     HMO: "",
     experience: "",
   };
+  const [specializations, setSpecializations] = useState([]);
+
+  useEffect(() => {
+    async function fetchSpecializations() {
+      try {
+        const response = await APIService.getSpecializations();
+        const data = response.data;
+        if (Array.isArray(data)) {
+          setSpecializations(data);
+        } else {
+          console.error('Expected an array but got', data);
+        }
+      } catch (error) {
+        console.error('Error fetching specializations:', error);
+      }
+    }
+
+    fetchSpecializations();
+  }, []);
+
 
   const [state, setState] = useState(defaultState);
   const navigate = useNavigate();
   const { isLogin, setIsLogin } = useContext(UserContext);
 
   const handleInputChange = (event) => {
+    console.log(event.target);
     const target = event.target;
     const value = target.value;
     const name = target.name;
@@ -144,7 +166,7 @@ const SignUp = () => {
   };
 
   function handleLoginLogout() {
-    setIsLogin(!isLogin); 
+    setIsLogin(!isLogin);
   }
 
   const submit = async (event) => {
@@ -155,9 +177,15 @@ const SignUp = () => {
         console.warn(state);
         setState(defaultState);
         if (state.userType === "Patient") {
-          await authServiceInstance.signup(buildNewPatient(state), state.userType);
+          await authServiceInstance.signup(
+            buildNewPatient(state),
+            state.userType
+          );
         } else if (state.userType === "Doctor") {
-          await authServiceInstance.signup(buildNewDoctor(state), state.userType);
+          await authServiceInstance.signup(
+            buildNewDoctor(state),
+            state.userType
+          );
         }
         console.log("SignUp successful");
         window.location.reload();
@@ -169,7 +197,6 @@ const SignUp = () => {
       }
     }
   };
-  
 
   const renderFormField = (fieldName, placeholder, type = "text") => (
     <div className={`form-floating mb-3 ${styles.formFloating}`}>
@@ -258,7 +285,41 @@ const SignUp = () => {
 
                       {state.userType === "Doctor" && (
                         <>
-                          {renderFormField("specialization", "Specialization")}
+                          <div
+                            className={`form-floating mb-3 ${styles.formFloating}`}
+                          >
+                            <select
+                              value={state.specialization || ""}
+                              onChange={handleInputChange}
+                              id="floatingSpecialization"
+                              name="specialization"
+                              className={`form-control ${styles.input} ${
+                                state.specializationError ? styles.invalid : ""
+                              }`}
+                            >
+                              <option value="">
+                                Select your specialization
+                              </option>
+                              {specializations.map((spec, index) => (
+                                <option key={index} value={spec}>
+                                  {spec}
+                                </option>
+                              ))}
+                            </select>
+
+                            <label
+                              htmlFor={`floating${
+                                "specialization".charAt(0).toUpperCase() +
+                                "specialization".slice(1)
+                              }`}
+                            >
+                              {"specialization".charAt(0).toUpperCase() +
+                                "specialization".slice(1)}
+                            </label>
+                            <span className={`text-danger ${styles.errorText}`}>
+                              {state[`${"specialization"}Error`]}
+                            </span>
+                          </div>
                           {renderFormField("hospital", "Hospital")}
                           {renderFormField("HMO", "HMO")}
                           {renderFormField("experience", "Experience")}
