@@ -9,7 +9,7 @@ export default function Home() {
     <div className={styles.Home}>
       <img className={styles.background} src={image} />
       <div className={styles.headers}>
-        <h1>Experience the future of healthcare with SYMPly-Care!</h1>
+        <h1>Experience future of healthcare with SYMPly-Care!</h1>
         <h3>
           Predict diseases by symptoms with quick access to online doctors for
           advice, prescriptions, and medical notes. Proactive healthcare,

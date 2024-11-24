@@ -98,7 +98,7 @@ export default function DoctorProfile() {
       appointments: user.appointments,
     };
 
-    return newUser; // Ensure you return the newUser object
+    return newUser; 
   };
 
   const [state, setState] = useState(defaultState);
