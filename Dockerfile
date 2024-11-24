@@ -1,19 +1,23 @@
+# Use a lightweight Node.js image
 FROM node:alpine AS development
 
 # Set the environment to development
 ENV NODE_ENV development
 
-# Create and set the working directory inside the container
-WORKDIR /SYMPly_Care_React/symply_care
+# Set the working directory inside the container
+WORKDIR /app
 
-# Copy package.json and package-lock.json into the working directory
-COPY ./SYMPly_Care_React/package*.json ./
+# Copy the package.json and package-lock.json to the working directory
+COPY package*.json ./
 
-# Install the dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the entire application directory into the container
-COPY ./SYMPly_Care_React .
+# Copy the rest of the application files into the container
+COPY . .
 
-# Start the React app
+# Expose the default React port (3000)
+EXPOSE 3000
+
+# Start the React application
 CMD ["npm", "start"]
