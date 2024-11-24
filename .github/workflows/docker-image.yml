@@ -7,18 +7,28 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    # Log in to Docker Hub
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # Build the Docker image and save the tag in a variable
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag symply_care:$(date +%s)
-    - name: Tag the image
-      run: docker tag symply_care:$(date +%s) ezratarab/symply_care:latest
+      id: build_image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker build . --file Dockerfile --tag symply_care:$IMAGE_TAG
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+    # Tag the image as 'latest'
+    - name: Tag the image as latest
+      run: docker tag symply_care:${{ env.IMAGE_TAG }} ezratarab/symply_care:latest
+
+    # Push the image to Docker Hub
     - name: Push the image
       run: docker push ezratarab/symply_care:latest
