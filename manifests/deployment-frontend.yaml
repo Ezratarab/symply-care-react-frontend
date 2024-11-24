@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: symply-care-frontend
+  labels:
+    app: symply-care-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: symply-care-frontend
+  template:
+    metadata:
+      labels:
+        app: symply-care-frontend
+    spec:
+      containers:
+      - name: symply-care-frontend-container
+        image: ezratarab/symply_care:latest
+        ports:
+        - containerPort: 80
