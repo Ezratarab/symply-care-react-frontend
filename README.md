@@ -1,7 +1,11 @@
-# Symply-Care – Frontend (React)
+## 🧩 About the Frontend
 
-This is the frontend service for **Symply-Care**, built using **React**. It provides the user interface to manage and display data fetched from the backend, allowing users to interact with the system seamlessly.
+The **Symply-Care Frontend** is a React-based web application that serves as the main user interface for the Symply-Care platform. It allows users to book appointments, submit inquiries, and interact with healthcare services provided by the system.
 
+This frontend communicates with the backend via RESTful APIs and displays dynamic content based on the user's actions and roles. It also supports containerized deployment using Docker and Kubernetes, making it suitable for modern cloud-native environments.
+
+
+![logo](./src/commponents/assets/symply_care_new.png)
 ---
 
 ## 🛠 Technologies Used
