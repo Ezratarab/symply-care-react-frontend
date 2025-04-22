@@ -20,7 +20,7 @@ This frontend communicates with the backend via RESTful APIs and displays dynami
       <sub>Java • Spring Boot • MySQL • RabbitMQ</sub>
     </td>
     <td align="center" width="33%">
-      <a href="[https://github.com/Ezratarab/symply-care-react-frontend]">
+      <a href="https://github.com/Ezratarab/symply-care-react-frontend">
         <img src="https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react" alt="Frontend">
       </a>
       <br>
@@ -29,7 +29,7 @@ This frontend communicates with the backend via RESTful APIs and displays dynami
       <sub>React • Next.js • TypeScript • Tailwind</sub>
     </td>
     <td align="center" width="33%">
-      <a href="[https://github.com/Ezratarab/symply-care-ML]">
+      <a href="https://github.com/Ezratarab/symply-care-ML">
         <img src="https://img.shields.io/badge/ML_Service-Flask-000000?style=for-the-badge&logo=flask" alt="ML Service">
       </a>
       <br>
