@@ -1,72 +1,125 @@
-# Getting Started with Create React App
+# Symply-Care – Frontend (React)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the frontend service for **Symply-Care**, built using **React**. It provides the user interface to manage and display data fetched from the backend, allowing users to interact with the system seamlessly.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🛠 Technologies Used
 
-### `npm start`
+- **ReactJS**
+- **JavaScript (ES6+)**
+- **React Router** – Page routing
+- **Axios** – API requests
+- **Redux** – State management
+- **Docker** – Containerization
+- **Kubernetes** – Deployment
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Getting Started
 
-### `npm test`
+### Clone the repository
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+git clone https://github.com/Ezratarab/symply-care-react-frontend.git
+cd symply-care-react-frontend
+```
 
-### `npm run build`
+### Install dependencies
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Run the development server
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm start
+```
 
-### `npm run eject`
+The app will be available at [http://localhost:3000](http://localhost:3000)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🐳 Docker Deployment
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Build the Docker image
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+docker build -t symply-care-frontend .
+```
 
-## Learn More
+### Run the Docker container
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+docker run -p 3000:3000 symply-care-frontend
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## ☸️ Kubernetes Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Make sure your cluster is set up, then apply the manifests:
 
-### Analyzing the Bundle Size
+```bash
+kubectl apply -f kubernetes/deployment-frontend.yaml
+kubectl apply -f kubernetes/service-frontend.yaml
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 🔗 Connecting to Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Update the `.env` file with your backend URL:
 
-### Advanced Configuration
+```env
+REACT_APP_API_URL=http://localhost:8080
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+If you're using RabbitMQ through frontend as well (if needed):
 
-### Deployment
+```env
+REACT_APP_RABBITMQ_URL=amqp://localhost
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 🧪 Running Tests
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# symply_care_react2
-# symply_care_react2
+```bash
+npm test
+```
+
+---
+
+## 📚 About the Project
+
+**Symply-Care Frontend** is the client-facing React app of the Symply-Care system. It connects to a Spring Boot backend and optionally communicates with a machine learning service through RabbitMQ. The UI supports appointments, inquiries, and healthcare-related features.
+
+It is fully dockerized and ready for Kubernetes deployment, making it suitable for modern cloud environments.
+
+---
+## 🔗 Part of the Symply-Care Project
+
+This repository is one of the three main components of the full Symply-Care system:
+
+🔙 Backend (Spring Boot) – Handles API logic, DB management, and RabbitMQ integration.
+
+💻 Frontend (React) – The UI application you are currently viewing.
+
+🧠 Machine Learning Service (Flask) – Processes ML predictions via RabbitMQ.
+
+---
+
+## 🤝 Contributing
+
+1. Fork this repository
+2. Create a new branch (`feature/xyz`)
+3. Commit your changes
+4. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
