@@ -11,7 +11,7 @@ This frontend communicates with the backend via RESTful APIs and displays dynami
 <table align="center">
   <tr>
     <td align="center" width="33%">
-      <a href="[https://github.com/Ezratarab/symply-care-springBoot-backend]">
+      <a href="https://github.com/Ezratarab/symply-care-springBoot-backend">
         <img src="https://img.shields.io/badge/Backend-Spring_Boot-6DB33F?style=for-the-badge&logo=spring" alt="Backend">
       </a>
       <br>
